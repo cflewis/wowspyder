@@ -1,0 +1,16 @@
+.output.log
+.output.txt
+output.txt
+.DS_Store
+.DS_STORE
+database.txt
+output.log
+*.pyc
+*~
+.dbpass
+wowcrawler/.output.log
+svn/*
+svn/
+*.svn
+svn*
+.wowspyder
