@@ -12,7 +12,9 @@ WoWSpyder is a pre-alpha, work-in-progress product.
 License
 =======
 
-WoWSpyder is released under the [BSD license](http://creativecommons.org/licenses/BSD/), copyright of the Regents of the University of California.
+WoWSpyder is released under the [BSD license](http://creativecommons.org/licenses/BSD/), copyright of the Regents of the University of California. Please pay special attention to the non-endorsement clause. Like all tools, it is possible to abuse WoWSpyder. This license means that I, nor the university where I research, takes any responsibility for your use of WoWSpyder.
+
+*Use WoWSpyder responsibly*. If you don't, Blizzard might pull the plug on XML access, which is bad for everyone.
 
 Setup
 =====
@@ -38,7 +40,7 @@ WoWSpyder uses SQLAlchemy to save to an database. That database can be anything 
 To Do
 =====
 * Actually finishing to an alpha stage
-* The option of changing 
+* Better documentation
 
 --
 [Chris Lewis](http://chris.to)
