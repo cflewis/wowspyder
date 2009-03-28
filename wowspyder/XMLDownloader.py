@@ -94,8 +94,7 @@ http://github.com/Lewisham/wowspyder")
 
         
 class XMLDownloaderThreaded():
-    '''A class to mediate threaded downloading of URLs, which removes wait time
-    roadblocks for being "nice" to the server.
+    '''A class to mediate threaded downloading of URLs.
     
     Calling close() when this object is no longer needed would be nice,
     but it closes threads when the object is destroyed.

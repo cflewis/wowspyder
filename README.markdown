@@ -34,13 +34,16 @@ Architecture
 Database
 --------
 
-WoWSpyder uses SQLAlchemy to save to an database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory database, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
+WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory database, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
 
 
 To Do
 =====
 * Actually finishing to an alpha stage
+* Better hiding of private methods
 * Better documentation
+
+By better... I mean actually started.
 
 --
 [Chris Lewis](http://chris.to)
