@@ -11,6 +11,7 @@ import sys
 import os
 import Logger
 from urllib2 import quote
+import re
 log = Logger.log()
 
 def get_site_url(site):
@@ -20,11 +21,40 @@ def get_site_url(site):
     return "http://" + server + ".wowarmory.com/"
     
 def get_arena_url(battlegroup, realm, site, ladder_number=2, page=1):
-    log.debug("Returning URL for " + battlegroup + "," + realm + ", " + site)
+    log.debug("Returning Arena URL: " + battlegroup + "," + realm + ", " + site)
     return get_site_url(site) + "arena-ladder.xml?b=" \
         + quote(battlegroup.encode("utf-8")) + "&ts=" + str(ladder_number) + "&fv=" \
         + quote(realm.encode("utf-8")) + "&ff=realm&p=" + str(page)
+        
+def get_team_url(name, realm, site, size):
+    log.debug("Returning Team URL")
+    return get_site_url(site) + "team-info.xml?" + \
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&ts=" + str(size) + \
+        "&t=" + quote(name.encode("utf-8"))
+        
+def get_character_sheet_url(name, realm, site):
+    log.debug("Returning character sheet URL")
+    return get_site_url(site) + "character-sheet.xml?" + \
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&n=" + quote(name.encode("utf-8"))
+        
+def get_guild_url(name, realm, site, page=1):
+    log.debug("Returning guild URL")
+    return get_site_url(site) + "guild-info.xml?" + \
+    "r=" + quote(realm.encode("utf-8")) + \
+    "&n=" + quote(name.encode("utf-8")) + \
+    "&p=" + str(page)
+    
+def get_max_pages(source):
+    return int(re.search("maxPage=\"(\d*)\"", source).group(1))
 
+def merge(seq):
+    merged = []
+    for s in seq:
+        for x in s:
+            merged.append(x)
+    return merged
 
 def main():
     pass

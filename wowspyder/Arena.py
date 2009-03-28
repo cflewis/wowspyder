@@ -42,26 +42,16 @@ class ArenaParser:
         Base.metadata.create_all(self.database.engine)
         self.tp = Team.TeamParser(downloader=downloader)
         
-        
     def __del__(self):
         self.downloader.close()
         
-    def get_arena_url(self, battlegroup, realm, site, ladder_number=2, page=1):
-        log.debug("Returning URL for " + battlegroup + "," + realm + ", " + site)
-        return WoWSpyderLib.get_site_url(site) + "arena-ladder.xml?b=" \
-            + urllib2.quote(battlegroup.encode("utf-8")) + "&ts=" + str(ladder_number) + "&fv=" \
-            + urllib2.quote(realm.encode("utf-8")) + "&ff=realm&p=" + str(page)
-                        
-    def get_arena_max_pages(self, source):
-        return int(re.search("maxPage=\"(\d*)\"", source).group(1))
-    
     def get_arena_teams(self, battlegroup, realm, site):
         '''Returns a list of arena teams, stored in the database'''
         for ladder_number in [2, 3, 5]:
             source = self.downloader.download_url( \
-                self.get_arena_url(battlegroup, realm, site, \
+                WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
                 ladder_number=ladder_number))
-            max_pages = self.get_arena_max_pages(source)
+            max_pages = WoWSpyderLib.get_max_pages(source)
         
             for page in range(1, (max_pages + 1)):
                 log.debug(battlegroup + " " + realm + \
@@ -69,7 +59,7 @@ class ArenaParser:
                     + str(max_pages))
                 
                 source = self.downloader.download_url( \
-                    self.get_arena_url(battlegroup, realm, site, page=page, \
+                    WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
                         ladder_number=ladder_number))
                 
                 teams = self.parse_arena_file(StringIO.StringIO(source), site)
@@ -99,23 +89,23 @@ class ArenaParser:
         
 class ArenaParserTests(unittest.TestCase):
     def setUp(self):
-        self.us_realm = u"Cenarius"
+        self.us_realm = u"Blackwater Raiders"
         self.us_battlegroup = u"Whirlwind"
         self.eu_realm = u"Argent Dawn"
         self.eu_battlegroup = u"Bloodlust"
         self.ap = ArenaParser()
         
     def testGetUSArenaURL(self):
-        us_url = self.ap.get_arena_url(self.us_battlegroup, \
+        us_url = WoWSpyderLib.get_arena_url(self.us_battlegroup, \
             self.us_realm, u"us")
         self.assertTrue(re.match("http://www.wowarmory", us_url))
         
     def testGetEUArenaURL(self):
-        eu_url = self.ap.get_arena_url(self.eu_battlegroup, self.eu_realm, u"eu")
+        eu_url = WoWSpyderLib.get_arena_url(self.eu_battlegroup, self.eu_realm, u"eu")
         self.assertTrue(re.match("http://eu.wowarmory", eu_url))
         
     def testGetEUArenaURLNonUnicode(self):
-        eu_url = self.ap.get_arena_url(self.eu_battlegroup, self.eu_realm, "eu")
+        eu_url = WoWSpyderLib.get_arena_url(self.eu_battlegroup, self.eu_realm, "eu")
         self.assertTrue(re.match("http://eu.wowarmory", eu_url))  
         
     def testGetGuilds(self):

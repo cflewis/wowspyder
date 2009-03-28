@@ -12,11 +12,15 @@ import os
 import unittest
 import sqlalchemy as sa
 import Preferences
+import Logger
 
 from sqlalchemy.ext.declarative import declarative_base
+import sqlalchemy.exceptions as sae
 
 Base = declarative_base()
 session = None
+
+log = Logger.log()
 
 class Database:
     def __init__(self, autocommit=True, echo=True):
@@ -30,7 +34,15 @@ class Database:
         self.session = Session()
         
     def insert(self, obj):
-        return self.session.merge(obj)
+        return_obj = None
+        
+        try:
+            return_obj = self.session.merge(obj)
+        except sae.IntegrityError, e:
+            # cflewis | 2009-03-28 | Do nothing... merging shouldn't have
+            # caused an integrity error
+            log.warning("Integrity error " + str(e))
+            raise
         
     def get_base(self):
         return Base

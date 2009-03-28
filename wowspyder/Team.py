@@ -17,14 +17,17 @@ import datetime
 import WoWSpyderLib
 from Guild import Guild
 from Battlegroup import Realm
+import Character
 import XMLDownloader
 from sqlalchemy import Table, Column, ForeignKey, ForeignKeyConstraint, \
     DateTime, Unicode, Integer
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relation, backref
+from Enum import Enum
 import urllib2
 import StringIO
+import Preferences
 
 log = Logger.log()
 database = Database.Database()
@@ -33,28 +36,35 @@ Base = database.get_base()
 class TeamParser:
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         '''Initialize the team parser.'''
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        self.downloader = downloader
         
-        if downloader is None:
+        if self.downloader is None:
             self.downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
         
-    def get_team(self, name, realm, site, size):
-        # cflewis | 2009-03-27 | Can speed this up by querying the DB
-        # for the object first
-        team = self.session.query(Team).get((name, realm, site))
+        self.database = database
+        self.session = self.database.session
+        Base.metadata.create_all(self.database.engine)
+        self.prefs = Preferences.Preferences()
         
-        if team:
-            return team
-        else:            
-            source = self.downloader.download_url(WoWSpyderLib.get_site_url(site) + "team-info.xml?" + \
-                "r=" + urllib2.quote(realm.encode("utf-8")) + \
-                "&ts=" + str(size) + \
-                "&t=" + urllib2.quote(name.encode("utf-8")))
+        self.cp = Character.CharacterParser(downloader=downloader)
+        
+    def get_team(self, name, realm, site, size=None):
+        team = None
+        
+        if not self.prefs.refresh_all:
+            # cflewis | 2009-03-28 | This won't check if there are the right
+            # characters in the team
+            team = self.session.query(Team).get((name, realm, site))
+        
+        if not team:
+            if not size: raise NameError("No team on that PK, " + \
+                "need size to create new team.")         
+            source = self.downloader.download_url(\
+                WoWSpyderLib.get_team_url(name, realm, site, size))
+            team = self.parse_team(StringIO.StringIO(source), site)
             
-        return self.parse_team(StringIO.StringIO(source), site)
+        return team
         
     def parse_team(self, xml_file_object, site):
         xml = minidom.parse(xml_file_object)
@@ -63,33 +73,46 @@ class TeamParser:
         
         name = team_node.attributes["name"].value
         realm = team_node.attributes["realm"].value
-        url = team_node.attributes["teamUrl"].value
         size = int(team_node.attributes["teamSize"].value)
-        team = Team(name, realm, site, size)
+        faction = team_node.attributes["faction"].value
+        team = Team(name, realm, site, size, faction)
         log.debug("Creating team " + name)
-        self.database.insert(team)
         
-        self.parse_team_characters(xml_file_object, site)
+        characters = self.parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
+        
+        # cflewis | 2009-03-28 | Add the characters to the team
+        for character in characters:
+            team.characters.append(character)
+        
+        # cflewis | 2009-03-28 | Merge to update the characters added
+        self.database.insert(team)
 
         return team
         
     def parse_team_characters(self, xml_file_object, site):
-        pass
-        # xml = minidom.parse(xml_file_object)
-        # character_nodes = xml.getElementsByTagName("character")
-        # 
-        # for character_node in character_nodes:
-        #     try:
-        #         name = character_node.attributes["guild"].value
-        #         realm = character_node.attributes["realm"].value
-        #         log.debug("Creating guild " + name)
-        #         guild = Guild(name, realm, site)
-        #         self.database.insert(guild)
-        #         guilds.append(guild)
-        #     except KeyError, e:
-        #         log.debug("Found no guild")
-        # 
-        # return guilds
+        xml = minidom.parse(xml_file_object)
+        character_nodes = xml.getElementsByTagName("character")
+        characters = []
+        
+        for character_node in character_nodes:
+            name = character_node.attributes["name"].value
+            realm = character_node.attributes["realm"].value
+            site = site
+            character = self.cp.get_character(name, realm, site)
+            characters.append(character)
+            
+        return characters
+
+
+team_characters = Table("TEAM_CHARACTERS", Base.metadata,
+    Column("realm", Unicode(100)),
+    Column("site", Unicode(2)),
+    Column("team_name", Unicode(100)),
+    Column("character_name", Unicode(100)),
+    ForeignKeyConstraint(['team_name','realm', 'site'], ['TEAM.name', \
+        'TEAM.realm', 'TEAM.site']),
+    ForeignKeyConstraint(['character_name','realm', 'site'], ['CHARACTER.name', \
+        'CHARACTER.realm', 'CHARACTER.site']))
 
 
 class Team(Base):
@@ -98,6 +121,7 @@ class Team(Base):
         Column("realm", Unicode(100), primary_key=True),
         Column("site", Unicode(2), primary_key=True),
         Column("size", Integer()),
+        Column("faction", Enum([u"Alliance", u"Horde"])),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
         Column("last_refresh", DateTime(), index=True),
         ForeignKeyConstraint(['realm', 'site'], ['REALM.name', 'REALM.site']),
@@ -106,36 +130,44 @@ class Team(Base):
     )
     
     realm_object = relation(Realm, backref=backref("teams"))
+    characters = relation(Character.Character, secondary=team_characters, backref=backref("teams"))
     
-    def __init__(self, name, realm, site, size, last_refresh=None):
+    def __init__(self, name, realm, site, size, faction, last_refresh=None):
         self.name = name
         self.realm = realm
         self.site = site
         self.size = size
+        self.faction = faction
         self.last_refresh = last_refresh
         
     def __repr__(self):
-        return unicode("<Team('%s','%s','%s','%d','%s')>" % (self.name, \
-            self.realm, self.site, self.size, self.team))
+        return unicode("<Team('%s','%s','%s','%d')>" % (self.name, \
+            self.realm, self.site, self.size))
     
     @property
     def url(self):
-        log.debug("Returning URL for " + self.name + "," + self.realm + "," + \
-            self.site)
-        return WoWSpyderLib.get_site_url(self.site) + "team-info.xml?" + \
-            "r=" + urllib2.quote(self.realm.encode("utf-8")) + \
-            "&ts=" + str(self.size) + \
-            "&t=" + urllib2.quote(self.name.encode("utf-8"))
+        return WoWSpyderLib.get_team_url(self.name, self.realm, self.site, \
+                self.size)
                 
 class TeamParserTests(unittest.TestCase):
     def setUp(self):
         self.tp = TeamParser()
-        self.test_team = database.session.query(Team).filter(and_(\
-            Team.realm == u"Cenarius", Team.name == u"Party Like Rockstars",
-            Team.site == u"us")).one()
+        self.test_team = self.tp.get_team(u"Party Like Rockstars", u"Cenarius", 
+            u"us", 5)
             
     def testRelation(self):
-        self.assertTrue(self.test_team.realm_object)
+        log.debug("Realm: " + str(self.test_team.realm_object))
+        characters = self.test_team.characters
+        log.debug("Characters: " + str(self.test_team.characters))
+        self.assertTrue(characters)
+        
+    def testRepitition(self):
+        test_team2 = self.tp.get_team(u"Party Like Rockstars", u"Cenarius", 
+            u"us", 5)
+        
+    # def testPrimaryKey(self):
+    #     self.assertTrue(self.tp.get_team(u"Party Like Rockstars", u"Cenarius", u"us"))
+
 
 if __name__ == '__main__':
     unittest.main()
