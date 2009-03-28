@@ -30,15 +30,15 @@ import Guild
 import Preferences
 
 log = Logger.log()
-database = Database.Database()
-Base = database.get_base()
+
+Base = Database.get_base()
 
 class CharacterParser:
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         '''Initialize the team parser.'''
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        
+        self.session = Database.session
+        Base.metadata.create_all(Database.engine)
         self.prefs = Preferences.Preferences()
         
         if downloader is None:
@@ -97,7 +97,7 @@ class CharacterParser:
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified)
         log.debug("Creating character " + name)
-        self.database.insert(character)
+        Database.insert(character)
                 
         return character
 

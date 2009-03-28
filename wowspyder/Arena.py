@@ -26,8 +26,7 @@ from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
 
 log = Logger.log()
-database = Database.Database()
-Base = database.get_base()
+Base = Database.get_base()
 
 class ArenaParser:
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
@@ -37,9 +36,8 @@ class ArenaParser:
             self.downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
                    
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        self.session = Database.session
+        Base.metadata.create_all(Database.engine)
         self.tp = Team.TeamParser(downloader=downloader)
         
     def __del__(self):

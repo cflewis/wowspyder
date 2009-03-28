@@ -19,14 +19,14 @@ from sqlalchemy import Table, Column, ForeignKey, ForeignKeyConstraint, \
 from sqlalchemy.ext.declarative import declarative_base
 
 log = Logger.log()
-database = Database.Database()
-Base = database.get_base()
+
+Base = Database.get_base()
 
 class BattlegroupParser:
     def __init__(self):
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        
+        self.session = Database.session
+        Base.metadata.create_all(Database.engine)
         
     def parse_battlegroup_file(self, filename):
         # cflewis | 2009-03-15 | This should parse as UTF-8 automatically
@@ -42,7 +42,7 @@ class BattlegroupParser:
         site = bg_node.attributes["site"].value
                 
         bg = Battlegroup(name, site)
-        self.database.insert(bg)
+        Database.insert(bg)
         log.debug("Battlegroup is %s %s" % (site, name))
         
         realms = bg_node.getElementsByTagName("realm")
@@ -58,7 +58,7 @@ class BattlegroupParser:
         language = realm_node.attributes["lang"].value        
         
         realm = Realm(name, site, battlegroup, server_type, language)
-        self.database.insert(realm)
+        Database.insert(realm)
         log.debug("Realm is %s %s" % (site, name))
         
     def get_realm_list(self):

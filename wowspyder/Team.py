@@ -30,8 +30,8 @@ import StringIO
 import Preferences
 
 log = Logger.log()
-database = Database.Database()
-Base = database.get_base()
+
+Base = Database.get_base()
 
 class TeamParser:
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
@@ -42,9 +42,9 @@ class TeamParser:
             self.downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
         
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        
+        self.session = Database.session
+        Base.metadata.create_all(Database.engine)
         self.prefs = Preferences.Preferences()
         
         self.cp = Character.CharacterParser(downloader=downloader)
@@ -85,7 +85,7 @@ class TeamParser:
             team.characters.append(character)
         
         # cflewis | 2009-03-28 | Merge to update the characters added
-        self.database.insert(team)
+        Database.insert(team)
 
         return team
         

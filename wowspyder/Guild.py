@@ -26,15 +26,15 @@ import StringIO
 import Preferences
 
 log = Logger.log()
-database = Database.Database()
-Base = database.get_base()
+
+Base = Database.get_base()
 
 class GuildParser:
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         '''Initialize the guild parser.'''
-        self.database = database
-        self.session = self.database.session
-        Base.metadata.create_all(self.database.engine)
+        
+        self.session = Database.session
+        Base.metadata.create_all(Database.engine)
         self.prefs = Preferences.Preferences()
         
         self.downloader = downloader
@@ -70,7 +70,7 @@ class GuildParser:
         site = site
         guild = Guild(name, realm, site)
         log.debug("Inserting guild " + guild.name)
-        self.database.insert(guild)
+        Database.insert(guild)
          
         # cflewis | 2009-03-28 | Now need to put in guild's characters
         if get_characters:
@@ -82,7 +82,7 @@ class GuildParser:
 
         # cflewis | 2009-03-28 | SQLAlchemy wasn't actually committing,
         # so I'm merging twice, and it seems to bite now.
-        self.database.insert(guild)
+        Database.insert(guild)
 
         return guild
          
