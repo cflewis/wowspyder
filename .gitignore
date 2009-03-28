@@ -13,4 +13,4 @@ svn/*
 svn/
 *.svn
 svn*
-.wowspyder
+.wowspyder.yaml
