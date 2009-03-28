@@ -18,6 +18,7 @@ log = Logger.log()
 def main():
     suite = unittest.TestLoader().loadTestsFromModule(wowspyder.XMLDownloader)
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Arena))
+    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Team))
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 

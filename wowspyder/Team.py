@@ -22,6 +22,7 @@ from sqlalchemy import Table, Column, ForeignKey, ForeignKeyConstraint, \
     DateTime, Unicode, Integer
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relation, backref
 import urllib2
 import StringIO
 
@@ -104,6 +105,8 @@ class Team(Base):
         mysql_engine="InnoDB"
     )
     
+    realm_object = relation(Realm, backref=backref("teams"))
+    
     def __init__(self, name, realm, site, size, last_refresh=None):
         self.name = name
         self.realm = realm
@@ -130,6 +133,9 @@ class TeamParserTests(unittest.TestCase):
         self.test_team = database.session.query(Team).filter(and_(\
             Team.realm == u"Cenarius", Team.name == u"Party Like Rockstars",
             Team.site == u"us")).one()
+            
+    def testRelation(self):
+        self.assertTrue(self.test_team.realm_object)
 
 if __name__ == '__main__':
     unittest.main()

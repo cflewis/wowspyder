@@ -42,6 +42,7 @@ To Do
 * Actually finishing to an alpha stage
 * Better hiding of private methods
 * Better documentation
+* Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through?
 
 By better... I mean actually started.
 

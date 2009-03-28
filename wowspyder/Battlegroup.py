@@ -114,7 +114,7 @@ class BattlegroupParserTests(unittest.TestCase):
         self.parser = BattlegroupParser()
         
     def testParser(self):
-        self.parser.parse_battlegroup_file("../data/battlegroups.xml")
+        self.parser.parse_battlegroup_file("../wowwidow/data/battlegroups.xml")
 
 if __name__ == '__main__':
     unittest.main()
