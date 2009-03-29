@@ -44,7 +44,7 @@ To Do
 * Better documentation, both for users and docstrings for developers.
 * Get the right levels assigned to the logging.
 * Handle all the character sheet things.
-* Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.
+* <strike>Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.</strike> This is really trying to prevent using the Arena access... downloading teams, characters and even guilds should really be OK.
 
 --
 [Chris Lewis](http://chris.to)

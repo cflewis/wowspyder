@@ -15,9 +15,9 @@ import Database
 import Logger
 import datetime
 import WoWSpyderLib
-from Guild import Guild
+from GuildCharacter import Guild, Character
+import GuildCharacter
 from Battlegroup import Realm
-import Character
 import XMLDownloader
 from sqlalchemy import Table, Column, ForeignKey, ForeignKeyConstraint, \
     DateTime, Unicode, Integer
@@ -42,12 +42,11 @@ class TeamParser:
             self.downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
         
-        
         self.session = Database.session
         Base.metadata.create_all(Database.engine)
         self.prefs = Preferences.Preferences()
         
-        self.cp = Character.CharacterParser(downloader=downloader)
+        self.cp = GuildCharacter.CharacterParser(downloader=self.downloader)
         
     def get_team(self, name, realm, site, size=None):
         team = None
@@ -102,7 +101,6 @@ class TeamParser:
         for character_node in character_nodes:
             name = character_node.attributes["name"].value
             realm = character_node.attributes["realm"].value
-            site = site
             character = self.cp.get_character(name, realm, site)
             characters.append(character)
             
@@ -135,7 +133,7 @@ class Team(Base):
     )
     
     realm_object = relation(Realm, backref=backref("teams"))
-    characters = relation(Character.Character, secondary=team_characters, backref=backref("teams"))
+    characters = relation(Character, secondary=team_characters, backref=backref("teams"))
     
     def __init__(self, name, realm, site, size, faction, last_refresh=None):
         self.name = name

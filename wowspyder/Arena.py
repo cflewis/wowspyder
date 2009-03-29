@@ -38,7 +38,7 @@ class ArenaParser:
                    
         self.session = Database.session
         Base.metadata.create_all(Database.engine)
-        self.tp = Team.TeamParser(downloader=downloader)
+        self.tp = Team.TeamParser(downloader=self.downloader)
         
     def __del__(self):
         self.downloader.close()

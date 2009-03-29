@@ -23,7 +23,7 @@ prefs = Preferences.Preferences()
 
 engine_url = prefs.database_url
 
-engine = sa.create_engine(engine_url, echo=False)
+engine = sa.create_engine(engine_url, echo=True)
 
 Session = sa.orm.sessionmaker(bind=engine, autocommit=True)
 session = Session()
