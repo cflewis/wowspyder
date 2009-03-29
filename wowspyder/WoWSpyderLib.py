@@ -27,17 +27,23 @@ def get_arena_url(battlegroup, realm, site, ladder_number=2, page=1):
         + quote(realm.encode("utf-8")) + "&ff=realm&p=" + str(page)
         
 def get_team_url(name, realm, site, size):
-    log.debug("Returning Team URL")
-    return get_site_url(site) + "team-info.xml?" + \
+    team_url = get_site_url(site) + "team-info.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&ts=" + str(size) + \
         "&t=" + quote(name.encode("utf-8"))
+
+    log.debug("Returning Team URL: " + team_url)
+        
+    return team_url
         
 def get_character_sheet_url(name, realm, site):
-    log.debug("Returning character sheet URL")
-    return get_site_url(site) + "character-sheet.xml?" + \
+    character_sheet_url = get_site_url(site) + "character-sheet.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&n=" + quote(name.encode("utf-8"))
+        
+    log.debug("Returning character sheet URL: " + character_sheet_url)
+    return character_sheet_url
+    
         
 def get_guild_url(name, realm, site, page=1):
     log.debug("Returning guild URL")

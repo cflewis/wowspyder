@@ -49,7 +49,7 @@ class XMLDownloader():
         self.download_url("http://www.wowarmory.com/login-status.xml")
         log.debug("Got cookie " + str(self.cj))
         
-    def download_url(self, url, backoffs_allowed = None, backoff_time = None):
+    def download_url(self, url, backoffs_allowed=None, backoff_time=None):
         if backoffs_allowed is None: backoffs_allowed = self.backoff_attempts
         if backoff_time is None: backoff_time = self.backoff_initial_time
                 
@@ -76,10 +76,15 @@ http://github.com/Lewisham/wowspyder")
                     log.error("Error %d: URL: %s, Sleeping for: %d" % (error.code, url, backoff_time))
                     time.sleep(backoff_time)
                     return self.download_url(url, \
-                    backoffs_allowed = backoffs_allowed - 1, \
-                    backoff_time = (backoff_time + (self.backoff_increment * random.uniform(1, 1.5))))
+                    backoffs_allowed=backoffs_allowed - 1, \
+                    backoff_time=(backoff_time + (self.backoff_increment * random.uniform(1, 1.5))))
                 else:
                     raise
+        except urllib2.URLError, error:
+            log.warning("Time out")
+            self.opener.close
+            return self.download_url(url, backoffs_allowed=backoffs_allowed, \
+                backoff_time=backoff_time)
         
         self.opener.close()
             

@@ -17,10 +17,10 @@ log = Logger.log()
 
 def main():
     suite = unittest.TestLoader().loadTestsFromModule(wowspyder.XMLDownloader)
-    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Arena))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Team))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Guild))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Character))
+    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Arena))
     unittest.TextTestRunner(verbosity=2).run(suite)
 
 

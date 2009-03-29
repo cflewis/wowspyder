@@ -62,6 +62,7 @@ class TeamParser:
                 "need size to create new team.")         
             source = self.downloader.download_url(\
                 WoWSpyderLib.get_team_url(name, realm, site, size))
+            log.debug("Creating team from " + unicode(name) + " " + unicode(realm) + " " + unicode(site))
             team = self.parse_team(StringIO.StringIO(source), site)
             
         return team
@@ -71,7 +72,11 @@ class TeamParser:
         team_nodes = xml.getElementsByTagName("arenaTeam")
         team_node = team_nodes[0]
         
-        name = team_node.attributes["name"].value
+        try:
+            name = team_node.attributes["name"].value
+        except KeyError, e:
+            print unicode(xml.toxml())
+            log.critical("Broken Team XML :" + xml.toxml())
         realm = team_node.attributes["realm"].value
         size = int(team_node.attributes["teamSize"].value)
         faction = team_node.attributes["faction"].value

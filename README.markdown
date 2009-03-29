@@ -39,13 +39,12 @@ WoWSpyder uses SQLAlchemy to save to a database. That database can be anything S
 
 To Do
 =====
-* Actually finishing to an alpha stage
-* Better hiding of private methods
+* Actually finishing to an alpha stage.
+* Better hiding of private methods.
 * Better documentation, both for users and docstrings for developers.
-* Handle all the character sheet things
-* Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through?
-
-By better... I mean actually started.
+* Get the right levels assigned to the logging.
+* Handle all the character sheet things.
+* Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.
 
 --
 [Chris Lewis](http://chris.to)
