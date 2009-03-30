@@ -60,9 +60,15 @@ class ArenaParser(object):
         
         '''
         for ladder_number in [2, 3, 5]:
-            source = self._downloader.download_url( \
-                WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
-                ladder_number=ladder_number))
+            try:
+                source = self._downloader.download_url( \
+                    WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
+                    ladder_number=ladder_number))
+            except Error, e:
+                log.warning("Couldn't get arena page for ladder " + 
+                    ladder_number + ", continuing...")
+                continue
+            
             max_pages = WoWSpyderLib.get_max_pages(source)
         
             for page in range(1, (max_pages + 1)):
@@ -70,9 +76,13 @@ class ArenaParser(object):
                     ": Downloading arena page " + str(page) + " of " \
                     + str(max_pages))
                 
-                source = self._downloader.download_url( \
-                    WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
-                        ladder_number=ladder_number))
+                try:
+                    source = self._downloader.download_url( \
+                        WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
+                            ladder_number=ladder_number))
+                except Error, e:
+                    log.warning("Couldn't get arena page, continuing...")
+                    continue
                 
                 teams = self.__parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
                 
@@ -91,8 +101,12 @@ class ArenaParser(object):
             name = team_node.attributes["name"].value
             realm = team_node.attributes["realm"].value
             size = team_node.attributes["size"].value
-            team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
-            teams.append(team)
+            
+            try:
+                team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
+                teams.append(team)
+            except Error, e:
+                log.warning("Couldn't get team " + name + ", continuing...")
             
         return teams
         
@@ -138,16 +152,16 @@ class ArenaParserTests(unittest.TestCase):
         log.info("Ended no character test at " + str(datetime.datetime.now()))
         print "Ended no character test at " + str(datetime.datetime.now())
         
-    def testGetTeamsAndCharacters(self):
-        original_option = self.prefs.refresh_all
-        self.prefs.refresh_all = False
-        print "Started character test at " + str(datetime.datetime.now())
-        log.info("Started character test at " + str(datetime.datetime.now()))
-        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
-        self.prefs.refresh_all = original_option
-        print "Ended character test at " + str(datetime.datetime.now())
-        log.info("Ended character test at " + str(datetime.datetime.now()))
-        
+    # def testGetTeamsAndCharacters(self):
+    #     original_option = self.prefs.refresh_all
+    #     self.prefs.refresh_all = False
+    #     print "Started character test at " + str(datetime.datetime.now())
+    #     log.info("Started character test at " + str(datetime.datetime.now()))
+    #     teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
+    #     self.prefs.refresh_all = original_option
+    #     print "Ended character test at " + str(datetime.datetime.now())
+    #     log.info("Ended character test at " + str(datetime.datetime.now()))
+    #     
         
 
 if __name__ == '__main__':

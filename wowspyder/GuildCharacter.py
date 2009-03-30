@@ -68,7 +68,7 @@ class CharacterParser(object):
         if not self._prefs.refresh_all:
             character = self._session.query(Character).get((name, realm, site))
         
-        if not character:      
+        if not character:
             source = self._downloader.download_url(\
                 WoWSpyderLib.get_character_sheet_url(name, realm, site))
             character = self.__parse_character(StringIO.StringIO(source), site)
@@ -102,8 +102,13 @@ class CharacterParser(object):
         
         if character_node.attributes["guildName"].value != "" or \
             character_node.attributes["guildName"].value is not None:
-            guild = gp.get_guild(character_node.attributes["guildName"].value, \
-                realm, site, get_characters=False)
+            
+            try:
+                guild = gp.get_guild(character_node.attributes["guildName"].value, \
+                    realm, site, get_characters=False)
+            except Error, e:
+                log.warning("Couldn't get guild " + name)
+                guild = None
             
             if guild is not None:
                 guild_rank = gp.get_guild_rank(guild.name, realm, site, name)
@@ -288,8 +293,13 @@ class GuildParser(object):
         
         for character_node in character_nodes:
             name = character_node.attributes["name"].value
-            character = cp.get_character(name, realm, site)
-            characters.append(character)
+            
+            try:
+                character = cp.get_character(name, realm, site)
+                characters.append(character)
+            except Error, e:
+                log.warning("Couldn't get character " + name + ", continuing...")
+                continue
             
         return characters
 

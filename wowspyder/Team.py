@@ -110,8 +110,13 @@ class TeamParser(object):
         for character_node in character_nodes:
             name = character_node.attributes["name"].value
             realm = character_node.attributes["realm"].value
-            character = self._cp.get_character(name, realm, site)
-            characters.append(character)
+            
+            try:
+                character = self._cp.get_character(name, realm, site)
+                characters.append(character)
+            except Error, e:
+                log.warning("Couldn't get character " + name + ", continuing...")
+                continue
             
         return characters
 

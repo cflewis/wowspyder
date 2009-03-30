@@ -50,7 +50,7 @@ class XMLDownloader(object):
         self.download_url("http://www.wowarmory.com/login-status.xml")
         log.debug("Got cookie " + str(self._cj))
         
-    def download_url(self, url, backoffs_allowed=None, backoff_time=None, continue=True):
+    def download_url(self, url, backoffs_allowed=None, backoff_time=None):
         """Download a URL and return the source. Specifying
         backoffs_allowed and backoff_time allows the downloader to retry
         downloading URLs on failure.
@@ -79,7 +79,7 @@ http://github.com/Lewisham/wowspyder")
             else:
                 # cflewis | 2009-03-15 | Blizzard blocked us. Back off.
                 if backoffs_allowed > 0:
-                    log.warning("Sleeping for: %d" % (error.code, url, backoff_time))
+                    log.warning("Sleeping for: %d" % (backoff_time))
                     time.sleep(backoff_time)
                     return self.download_url(url, \
                     backoffs_allowed=backoffs_allowed - 1, \
