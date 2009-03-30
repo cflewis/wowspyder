@@ -64,7 +64,7 @@ class ArenaParser(object):
                 source = self._downloader.download_url( \
                     WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
                     ladder_number=ladder_number))
-            except Error, e:
+            except Exception, e:
                 log.warning("Couldn't get arena page for ladder " + 
                     ladder_number + ", continuing...")
                 continue
@@ -80,7 +80,7 @@ class ArenaParser(object):
                     source = self._downloader.download_url( \
                         WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
                             ladder_number=ladder_number))
-                except Error, e:
+                except Exception, e:
                     log.warning("Couldn't get arena page, continuing...")
                     continue
                 
@@ -105,7 +105,7 @@ class ArenaParser(object):
             try:
                 team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
                 teams.append(team)
-            except Error, e:
+            except Exception, e:
                 log.warning("Couldn't get team " + name + ", con")
             
         return teams

@@ -106,7 +106,7 @@ class CharacterParser(object):
             try:
                 guild = gp.get_guild(character_node.attributes["guildName"].value, \
                     realm, site, get_characters=False)
-            except Error, e:
+            except Exception, e:
                 log.warning("Couldn't get guild " + name)
                 guild = None
             
@@ -123,6 +123,12 @@ class CharacterParser(object):
             last_modified_string = character_node.attributes["lastModified"].value
             last_modified = datetime.datetime(\
                 *time.strptime(last_modified_string, "%B %d, %Y")[0:5])
+            if last_modified.year < 2008:
+                # cflewis | 2009-03-30 | The Armory has been returning strange
+                # years intermittently, not replicable when I manually visit
+                # the page. I'll set the year to what the current year is.
+                last_modified.replace(year=datetime.datetime.now().year)
+                
         except KeyError, e:
             # cflewis | 2009-03-28 | Armory must be down. Oh well.
             pass
@@ -297,7 +303,7 @@ class GuildParser(object):
             try:
                 character = cp.get_character(name, realm, site)
                 characters.append(character)
-            except Error, e:
+            except Exception, e:
                 log.warning("Couldn't get character " + name + ", continuing...")
                 continue
             

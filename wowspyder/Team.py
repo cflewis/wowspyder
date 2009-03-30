@@ -114,7 +114,7 @@ class TeamParser(object):
             try:
                 character = self._cp.get_character(name, realm, site)
                 characters.append(character)
-            except Error, e:
+            except Exception, e:
                 log.warning("Couldn't get character " + name + ", continuing...")
                 continue
             

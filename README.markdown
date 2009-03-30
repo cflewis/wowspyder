@@ -28,15 +28,15 @@ You'll need an install of [SQLAlchemy](http://www.sqlalchemy.org/) and [PyYaml](
 Other things
 ------------
 Make a yaml file called ".wowspyder.yaml" in the wowspyder/ directory with
-a "database_url" key, with your database URL.
+a "except Exception_url" key, with your except Exception URL.
 
 Architecture
 ============
 
-Database
+except Exception
 --------
 
-WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory database, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
+WoWSpyder uses SQLAlchemy to save to a except Exception. That except Exception can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory except Exception, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
 
 
 To Do

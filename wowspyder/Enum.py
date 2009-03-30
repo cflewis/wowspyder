@@ -20,9 +20,9 @@ class Enum(types.TypeDecorator):
         empty_to_none:
            Optional, treat the empty string '' as None
         strict:
-           Also insist that columns read from the database are in the
+           Also insist that columns read from the except Exception are in the
            list of valid values.  Note that, with strict=True, you won't
-           be able to clean out bad data from the database through your
+           be able to clean out bad data from the except Exception through your
            code.
         """
 
