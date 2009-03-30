@@ -106,7 +106,7 @@ class ArenaParser(object):
                 team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
                 teams.append(team)
             except Error, e:
-                log.warning("Couldn't get team " + name + ", continuing...")
+                log.warning("Couldn't get team " + name + ", con")
             
         return teams
         
@@ -152,16 +152,16 @@ class ArenaParserTests(unittest.TestCase):
         log.info("Ended no character test at " + str(datetime.datetime.now()))
         print "Ended no character test at " + str(datetime.datetime.now())
         
-    # def testGetTeamsAndCharacters(self):
-    #     original_option = self.prefs.refresh_all
-    #     self.prefs.refresh_all = False
-    #     print "Started character test at " + str(datetime.datetime.now())
-    #     log.info("Started character test at " + str(datetime.datetime.now()))
-    #     teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
-    #     self.prefs.refresh_all = original_option
-    #     print "Ended character test at " + str(datetime.datetime.now())
-    #     log.info("Ended character test at " + str(datetime.datetime.now()))
-    #     
+    def testGetTeamsAndCharacters(self):
+        original_option = self.prefs.refresh_all
+        self.prefs.refresh_all = False
+        print "Started character test at " + str(datetime.datetime.now())
+        log.info("Started character test at " + str(datetime.datetime.now()))
+        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
+        self.prefs.refresh_all = original_option
+        print "Ended character test at " + str(datetime.datetime.now())
+        log.info("Ended character test at " + str(datetime.datetime.now()))
+        
         
 
 if __name__ == '__main__':
