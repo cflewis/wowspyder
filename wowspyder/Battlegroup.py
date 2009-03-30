@@ -22,10 +22,13 @@ log = Logger.log()
 
 Base = Database.get_base()
 
-class BattlegroupParser:
+class BattlegroupParser(object):
+    """A parser to retrieve realms and battlegroups from the XML file
+    provided by Okoloth's Armory Musings. http://armory-musings.appspot.com/
+    
+    """
     def __init__(self):
-        
-        self.session = Database.session
+        self._session = Database.session
         Base.metadata.create_all(Database.engine)
         
     def parse_battlegroup_file(self, filename):
@@ -35,9 +38,9 @@ class BattlegroupParser:
         battlegroups = xml.getElementsByTagName("battlegroup")
         
         for bg_node in battlegroups:
-            self.parse_battlegroup_node(bg_node)
+            self.__parse_battlegroup_node(bg_node)
         
-    def parse_battlegroup_node(self, bg_node):
+    def __parse_battlegroup_node(self, bg_node):
         name = bg_node.attributes["name"].value
         site = bg_node.attributes["site"].value
                 
@@ -48,9 +51,9 @@ class BattlegroupParser:
         realms = bg_node.getElementsByTagName("realm")
         
         for realm_node in realms:
-            self.parse_realm_node(realm_node)
+            self.__parse_realm_node(realm_node)
         
-    def parse_realm_node(self, realm_node):
+    def __parse_realm_node(self, realm_node):
         name = realm_node.attributes["name"].value
         site = realm_node.attributes["site"].value
         battlegroup = realm_node.parentNode.attributes["name"].value
@@ -62,13 +65,15 @@ class BattlegroupParser:
         log.debug("Realm is %s %s" % (site, name))
         
     def get_realm_list(self):
-        return self.session.query(Realm).all()
+        return self._session.query(Realm).all()
         
     def get_us_realm_list(self):
-        return self.session.query(Realm).filter(Realm.site == u"us").all()
+        return self._session.query(Realm).filter(Realm.site == u"us").all()
 
 
 class Battlegroup(Base):
+    """A battlegroup, with a name and a site."""
+    
     __table__ = Table("BATTLEGROUP", Base.metadata,
         Column("name", Unicode(100), primary_key=True),
         Column("site", Unicode(2), primary_key=True),
@@ -85,6 +90,7 @@ class Battlegroup(Base):
         
         
 class Realm(Base):
+    """A realm"""
     __table__ = Table("REALM", Base.metadata,    
         Column("name", Unicode(100), primary_key=True),
         Column("site", Unicode(2), primary_key=True),
@@ -114,7 +120,7 @@ class BattlegroupParserTests(unittest.TestCase):
         self.parser = BattlegroupParser()
         
     def testParser(self):
-        self.parser.parse_battlegroup_file("../wowwidow/data/battlegroups.xml")
+        self.parser.parse_battlegroup_file("data/battlegroups.xml")
 
 if __name__ == '__main__':
     unittest.main()

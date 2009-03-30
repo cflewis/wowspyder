@@ -13,16 +13,16 @@ import unittest
 import logging
 import logging.handlers
 
-__log = logging.getLogger("wowspyder")
-__log.setLevel(logging.DEBUG)
+_log = logging.getLogger("wowspyder")
+_log.setLevel(logging.INFO)
 
-__handler = logging.FileHandler(".output.log", "w")
-__formatter = logging.Formatter("%(asctime)s : %(levelname)s : " + \
+_handler = logging.FileHandler(".output.log", "w")
+_formatter = logging.Formatter("%(asctime)s : %(levelname)s : " + \
     "%(module)s,%(lineno)d : %(message)s")
 
-__handler.setFormatter(__formatter)
+_handler.setFormatter(_formatter)
 
-__log.addHandler(__handler)
+_log.addHandler(_handler)
 
 def log():
-    return __log
+    return _log

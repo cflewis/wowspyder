@@ -13,6 +13,7 @@ import unittest
 import sqlalchemy as sa
 import Preferences
 import Logger
+import logging
 
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.exceptions as sae
@@ -21,17 +22,27 @@ Base = declarative_base()
 
 prefs = Preferences.Preferences()
 
+log = Logger.log()
+
 engine_url = prefs.database_url
 
-engine = sa.create_engine(engine_url, echo=True)
+echo = False
+
+if log.isEnabledFor(logging.DEBUG):
+    echo = True
+
+engine = sa.create_engine(engine_url, echo=echo)
 
 Session = sa.orm.sessionmaker(bind=engine, autocommit=True)
 session = Session()
 
-log = Logger.log()
-
     
 def insert(obj):
+    """Insert an object into the database. Really, this just happens with
+    an SQLAlchemy merge, so WoWSpyder never has to worry about whether to
+    insert or update.
+    
+    """
     return_obj = None
     
     try:
@@ -43,6 +54,7 @@ def insert(obj):
         raise
     
 def get_base():
+    """Returns the SQLAlchemy Base object."""
     return Base
 
 

@@ -13,15 +13,32 @@ import unittest
 import yaml
 import re
 
-class Preferences:
+class Preferences(object):
     def __init__(self, preferences_file= \
             re.sub("Preferences.py(c)?$", "", os.path.abspath(__file__)) + \
             ".wowspyder.yaml"):
         stream = open(preferences_file, 'r')
-        options = yaml.load(stream)
-        self.database_url = options["database_url"]
-        self.refresh_all = options["refresh_all"]
+        self.__options__ = yaml.load(stream)
 
+    @property
+    def options(self):
+        return self.__options__
+        
+    @property
+    def refresh_all(self):
+        return self.__options__["refresh_all"]
+        
+    @refresh_all.setter
+    def refresh_all(self, value):
+        self.__options__["refresh_all"] = value
+        
+    @property
+    def database_url(self):
+        return self.__options__["database_url"]
+        
+    @database_url.setter
+    def database_url(self, value):
+        self.__options__["database_url"] = value
 
 class PreferencesTests(unittest.TestCase):
     def setUp(self):

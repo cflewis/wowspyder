@@ -11,15 +11,12 @@ import sys
 import os
 import unittest
 import wowspyder
-from wowspyder import Battlegroup, XMLDownloader, Arena, Logger
-
-log = Logger.log()
+from wowspyder import Battlegroup, XMLDownloader, Arena, Team, GuildCharacter
 
 def main():
     suite = unittest.TestLoader().loadTestsFromModule(wowspyder.XMLDownloader)
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Team))
-    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Guild))
-    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Character))
+    suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.GuildCharacter))
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Arena))
     unittest.TextTestRunner(verbosity=2).run(suite)
 

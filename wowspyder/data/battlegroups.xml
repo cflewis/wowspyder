@@ -1,0 +1,568 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- This data is from http://armory-musings.appspot.com/ and published under a Creative Commons Attribution 3.0 License. -->
+<battlegroups>
+  <battlegroup name="Blackout" site="eu">
+    <realm name="Agamaggan" site="eu" type="pvp" lang="en" />
+    <realm name="Aggramar" site="eu" type="pve" lang="en" />
+    <realm name="Al'Akir" site="eu" type="pvp" lang="en" />
+    <realm name="Arathor" site="eu" type="pve" lang="en" />
+    <realm name="Aszune" site="eu" type="pve" lang="en" />
+    <realm name="Azjol-Nerub" site="eu" type="pve" lang="en" />
+    <realm name="Bladefist" site="eu" type="pvp" lang="en" />
+    <realm name="Bloodhoof" site="eu" type="pve" lang="en" />
+    <realm name="Bloodscalp" site="eu" type="pvp" lang="en" />
+    <realm name="Burning Blade" site="eu" type="pvp" lang="en" />
+    <realm name="Doomhammer" site="eu" type="pve" lang="en" />
+    <realm name="Draenor" site="eu" type="pve" lang="en" />
+    <realm name="Dragonblight" site="eu" type="pve" lang="en" />
+    <realm name="Emerald Dream" site="eu" type="pve" lang="en" />
+    <realm name="Sunstrider" site="eu" type="pvp" lang="en" />
+    <realm name="Twilight's Hammer" site="eu" type="pvp" lang="en" />
+    <realm name="Warsong" site="eu" type="pvp" lang="en" />
+    <realm name="Zenedar" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Bloodlust" site="eu">
+    <realm name="Argent Dawn" site="eu" type="rp-pve" lang="en" />
+    <realm name="Burning Legion" site="eu" type="pvp" lang="en" />
+    <realm name="Crushridge" site="eu" type="pvp" lang="en" />
+    <realm name="Daggerspine" site="eu" type="pvp" lang="en" />
+    <realm name="Deathwing" site="eu" type="pvp" lang="en" />
+    <realm name="Dragonmaw" site="eu" type="pvp" lang="en" />
+    <realm name="Dunemaul" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Blutdurst" site="eu">
+    <realm name="Aegwynn" site="eu" type="pvp" lang="de" />
+    <realm name="Destromath" site="eu" type="pvp" lang="de" />
+    <realm name="Die Silberne Hand" site="eu" type="rp-pve" lang="de" />
+    <realm name="Eredar" site="eu" type="pvp" lang="de" />
+    <realm name="Frostmourne" site="eu" type="pvp" lang="de" />
+    <realm name="Frostwolf" site="eu" type="pvp" lang="de" />
+    <realm name="Gorgonnash" site="eu" type="pvp" lang="de" />
+    <realm name="Gul'dan" site="eu" type="pvp" lang="de" />
+    <realm name="Kel'Thuzad" site="eu" type="pvp" lang="de" />
+    <realm name="Kil'jaeden" site="eu" type="pvp" lang="de" />
+    <realm name="Madmortem" site="eu" type="pve" lang="de" />
+    <realm name="Mal'Ganis" site="eu" type="pvp" lang="de" />
+    <realm name="Malfurion" site="eu" type="pve" lang="de" />
+    <realm name="Mannoroth" site="eu" type="pvp" lang="de" />
+    <realm name="Nathrezim" site="eu" type="pvp" lang="de" />
+    <realm name="Nozdormu" site="eu" type="pve" lang="de" />
+    <realm name="Perenolde" site="eu" type="pve" lang="de" />
+    <realm name="Proudmoore" site="eu" type="pve" lang="de" />
+    <realm name="Zirkel des Cenarius" site="eu" type="rp-pve" lang="de" />
+    <realm name="Zuluhed" site="eu" type="pvp" lang="de" />
+  </battlegroup>
+  <battlegroup name="Cataclysme" site="eu">
+    <realm name="Archimonde" site="eu" type="pvp" lang="fr" />
+    <realm name="Cho'gall" site="eu" type="pvp" lang="fr" />
+    <realm name="Dalaran" site="eu" type="pve" lang="fr" />
+    <realm name="Elune" site="eu" type="pve" lang="fr" />
+    <realm name="Hyjal" site="eu" type="pve" lang="fr" />
+    <realm name="Illidan" site="eu" type="pvp" lang="fr" />
+    <realm name="Kael'thas" site="eu" type="pvp" lang="fr" />
+    <realm name="Kirin Tor" site="eu" type="rp-pve" lang="fr" />
+    <realm name="Ner'zhul" site="eu" type="pvp" lang="fr" />
+    <realm name="Sargeras" site="eu" type="pvp" lang="fr" />
+    <realm name="Sinstralis" site="eu" type="pvp" lang="fr" />
+  </battlegroup>
+  <battlegroup name="Conviction" site="eu">
+    <realm name="Balnazzar" site="eu" type="pvp" lang="en" />
+    <realm name="Genjuros" site="eu" type="pvp" lang="en" />
+    <realm name="Hellscream" site="eu" type="pve" lang="en" />
+    <realm name="Laughing Skull" site="eu" type="pvp" lang="en" />
+    <realm name="Magtheridon" site="eu" type="pvp" lang="en" />
+    <realm name="Nordrassil" site="eu" type="pve" lang="en" />
+    <realm name="Quel'Thalas" site="eu" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Crueldad" site="eu">
+    <realm name="C'Thun" site="eu" type="pvp" lang="es" />
+    <realm name="Dun Modr" site="eu" type="pvp" lang="es" />
+    <realm name="Exodar" site="eu" type="pve" lang="es" />
+    <realm name="Los Errantes" site="eu" type="rp-pve" lang="es" />
+    <realm name="Minahonda" site="eu" type="pve" lang="es" />
+    <realm name="Shen'dralar" site="eu" type="rp-pvp" lang="es" />
+    <realm name="Tyrande" site="eu" type="pve" lang="es" />
+    <realm name="Uldum" site="eu" type="pvp" lang="es" />
+    <realm name="Zul'jin" site="eu" type="pvp" lang="es" />
+  </battlegroup>
+  <battlegroup name="Cyclone" site="eu">
+    <realm name="Earthen Ring" site="eu" type="rp-pve" lang="en" />
+    <realm name="Ravencrest" site="eu" type="pvp" lang="en" />
+    <realm name="Runetotem" site="eu" type="pve" lang="en" />
+    <realm name="Shadowmoon" site="eu" type="pvp" lang="en" />
+    <realm name="Shadowsong" site="eu" type="pve" lang="en" />
+    <realm name="Shattered Hand" site="eu" type="pvp" lang="en" />
+    <realm name="Silvermoon" site="eu" type="pve" lang="en" />
+    <realm name="Skullcrusher" site="eu" type="pvp" lang="en" />
+    <realm name="Spinebreaker" site="eu" type="pvp" lang="en" />
+    <realm name="Stormrage" site="eu" type="pve" lang="en" />
+    <realm name="Stormreaver" site="eu" type="pvp" lang="en" />
+    <realm name="Stormscale" site="eu" type="pvp" lang="en" />
+    <realm name="Terenas" site="eu" type="pve" lang="en" />
+    <realm name="Thunderhorn" site="eu" type="pve" lang="en" />
+    <realm name="Turalyon" site="eu" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Férocité" site="eu">
+    <realm name="Conseil des Ombres" site="eu" type="rp-pvp" lang="fr" />
+    <realm name="Drek'Thar" site="eu" type="pve" lang="fr" />
+    <realm name="Khaz Modan" site="eu" type="pve" lang="fr" />
+    <realm name="Les Sentinelles" site="eu" type="rp-pve" lang="fr" />
+    <realm name="Rashgarroth" site="eu" type="pvp" lang="fr" />
+    <realm name="Throk'Feroth" site="eu" type="pvp" lang="fr" />
+    <realm name="Varimathras" site="eu" type="pvp" lang="fr" />
+  </battlegroup>
+  <battlegroup name="Flurry" site="eu">
+    <realm name="Азурегос" site="eu" type="pve" lang="ru" />
+    <realm name="Вечная Песня" site="eu" type="pve" lang="ru" />
+    <realm name="Гордунни" site="eu" type="pvp" lang="ru" />
+    <realm name="Гром" site="eu" type="pvp" lang="ru" />
+    <realm name="Король-лич" site="eu" type="pvp" lang="ru" />
+    <realm name="Пиратская бухта" site="eu" type="pvp" lang="ru" />
+    <realm name="Свежеватель душ" site="eu" type="pvp" lang="ru" />
+    <realm name="Страж смерти" site="eu" type="pvp" lang="ru" />
+    <realm name="Термоштепсель" site="eu" type="pvp" lang="ru" />
+    <realm name="Ясеневый лес" site="eu" type="pvp" lang="ru" />
+  </battlegroup>
+  <battlegroup name="Glutsturm" site="eu">
+    <realm name="Anetheron" site="eu" type="pvp" lang="de" />
+    <realm name="Arthas" site="eu" type="pvp" lang="de" />
+    <realm name="Azshara" site="eu" type="pvp" lang="de" />
+    <realm name="Blackmoore" site="eu" type="pvp" lang="de" />
+    <realm name="Blackrock" site="eu" type="pvp" lang="de" />
+    <realm name="Die Arguswacht" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Die ewige Wacht" site="eu" type="rp-pve" lang="de" />
+    <realm name="Die Todeskrallen" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Durotan" site="eu" type="pve" lang="de" />
+    <realm name="Nazjatar" site="eu" type="pvp" lang="de" />
+    <realm name="Nefarian" site="eu" type="pvp" lang="de" />
+    <realm name="Thrall" site="eu" type="pve" lang="de" />
+    <realm name="Tichondrius" site="eu" type="pvp" lang="de" />
+  </battlegroup>
+  <battlegroup name="Hinterhalt" site="eu">
+    <realm name="Area 52" site="eu" type="pve" lang="de" />
+    <realm name="Arygos" site="eu" type="pve" lang="de" />
+    <realm name="Der Mithrilorden" site="eu" type="rp-pve" lang="de" />
+    <realm name="Dethecus" site="eu" type="pvp" lang="de" />
+    <realm name="Forscherliga" site="eu" type="rp-pve" lang="de" />
+    <realm name="Norgannon" site="eu" type="pve" lang="de" />
+    <realm name="Teldrassil" site="eu" type="pve" lang="de" />
+    <realm name="Todeswache" site="eu" type="rp-pve" lang="de" />
+    <realm name="Un'Goro" site="eu" type="pvp" lang="de" />
+  </battlegroup>
+  <battlegroup name="Misery" site="eu">
+    <realm name="Aerie Peak" site="eu" type="pve" lang="en" />
+    <realm name="Boulderfist" site="eu" type="pvp" lang="en" />
+    <realm name="Chamber of Aspects" site="eu" type="pve" lang="en" />
+    <realm name="Eonar" site="eu" type="pve" lang="en" />
+    <realm name="Frostmane" site="eu" type="pvp" lang="en" />
+    <realm name="Grim Batol" site="eu" type="pvp" lang="en" />
+    <realm name="Jaedenar" site="eu" type="pvp" lang="en" />
+    <realm name="Kazzak" site="eu" type="pvp" lang="en" />
+    <realm name="Kilrogg" site="eu" type="pve" lang="en" />
+    <realm name="Outland" site="eu" type="pvp" lang="en" />
+    <realm name="Ravenholdt" site="eu" type="rp-pvp" lang="en" />
+    <realm name="Stonemaul" site="eu" type="pvp" lang="en" />
+    <realm name="Tarren Mill" site="eu" type="pvp" lang="en" />
+    <realm name="Vek'nilash" site="eu" type="pvp" lang="en" />
+    <realm name="Wildhammer" site="eu" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Némésis" site="eu">
+    <realm name="Arak-arahm" site="eu" type="pvp" lang="fr" />
+    <realm name="Confrérie du Thorium" site="eu" type="rp-pve" lang="fr" />
+    <realm name="Eitrigg" site="eu" type="pve" lang="fr" />
+    <realm name="Garona" site="eu" type="pvp" lang="fr" />
+    <realm name="La Croisade écarlate" site="eu" type="rp-pvp" lang="fr" />
+    <realm name="Medivh" site="eu" type="pve" lang="fr" />
+    <realm name="Uldaman" site="eu" type="pve" lang="fr" />
+    <realm name="Vol'jin" site="eu" type="pve" lang="fr" />
+  </battlegroup>
+  <battlegroup name="Nightfall" site="eu">
+    <realm name="Alonsus" site="eu" type="pve" lang="en" />
+    <realm name="Anachronos" site="eu" type="pve" lang="en" />
+    <realm name="Bronze Dragonflight" site="eu" type="pve" lang="en" />
+    <realm name="Burning Steppes" site="eu" type="pvp" lang="en" />
+    <realm name="Darkmoon Faire" site="eu" type="rp-pve" lang="en" />
+    <realm name="Darkspear" site="eu" type="pve" lang="en" />
+    <realm name="Kor'gall" site="eu" type="pvp" lang="en" />
+    <realm name="Lightbringer" site="eu" type="pve" lang="en" />
+    <realm name="Molten Core" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Rampage" site="eu">
+    <realm name="Bloodfeather" site="eu" type="pvp" lang="en" />
+    <realm name="Darksorrow" site="eu" type="pvp" lang="en" />
+    <realm name="Defias Brotherhood" site="eu" type="rp-pvp" lang="en" />
+    <realm name="Frostwhisper" site="eu" type="pvp" lang="en" />
+    <realm name="Haomarush" site="eu" type="pvp" lang="en" />
+    <realm name="Lightning's Blade" site="eu" type="pvp" lang="en" />
+    <realm name="Neptulon" site="eu" type="pvp" lang="en" />
+    <realm name="Ragnaros" site="eu" type="pvp" lang="en" />
+    <realm name="Sylvanas" site="eu" type="pvp" lang="en" />
+    <realm name="The Maelstrom" site="eu" type="pvp" lang="en" />
+    <realm name="The Venture Co" site="eu" type="rp-pvp" lang="en" />
+    <realm name="Twisting Nether" site="eu" type="pvp" lang="en" />
+    <realm name="Vashj" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Raserei" site="eu">
+    <realm name="Aman'Thul" site="eu" type="pve" lang="de" />
+    <realm name="Anub'arak" site="eu" type="pvp" lang="de" />
+    <realm name="Das Syndikat" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Der Rat von Dalaran" site="eu" type="rp-pve" lang="de" />
+    <realm name="Dun Morogh" site="eu" type="pve" lang="de" />
+    <realm name="Krag'jin" site="eu" type="pvp" lang="de" />
+    <realm name="Kult der Verdammten" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Nera'thor" site="eu" type="pvp" lang="de" />
+    <realm name="Onyxia" site="eu" type="pvp" lang="de" />
+    <realm name="Sen'jin" site="eu" type="pve" lang="de" />
+    <realm name="Terrordar" site="eu" type="pvp" lang="de" />
+    <realm name="Theradras" site="eu" type="pvp" lang="de" />
+    <realm name="Wrathbringer" site="eu" type="pvp" lang="de" />
+  </battlegroup>
+  <battlegroup name="Reckoning" site="eu">
+    <realm name="Ahn'Qiraj" site="eu" type="pvp" lang="en" />
+    <realm name="Bronzebeard" site="eu" type="pve" lang="en" />
+    <realm name="Chromaggus" site="eu" type="pvp" lang="en" />
+    <realm name="Dentarg" site="eu" type="pvp" lang="en" />
+    <realm name="Drak'thul" site="eu" type="pvp" lang="en" />
+    <realm name="Emeriss" site="eu" type="pvp" lang="en" />
+    <realm name="Executus" site="eu" type="pvp" lang="en" />
+    <realm name="Khadgar" site="eu" type="pve" lang="en" />
+    <realm name="Kul Tiras" site="eu" type="pve" lang="en" />
+    <realm name="Mazrigos" site="eu" type="pvp" lang="en" />
+    <realm name="Moonglade" site="eu" type="rp-pve" lang="en" />
+    <realm name="Talnivarr" site="eu" type="pvp" lang="en" />
+    <realm name="Trollbane" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Représailles" site="eu">
+    <realm name="Chants éternels" site="eu" type="pve" lang="fr" />
+    <realm name="Les Clairvoyants" site="eu" type="rp-pve" lang="fr" />
+    <realm name="Marécage de Zangar" site="eu" type="pve" lang="fr" />
+    <realm name="Naxxramas" site="eu" type="pvp" lang="fr" />
+    <realm name="Temple noir" site="eu" type="pvp" lang="fr" />
+  </battlegroup>
+  <battlegroup name="Ruin" site="eu">
+    <realm name="Azuremyst" site="eu" type="pve" lang="en" />
+    <realm name="Blade's Edge" site="eu" type="pve" lang="en" />
+    <realm name="Hakkar" site="eu" type="pvp" lang="en" />
+    <realm name="Scarshield Legion" site="eu" type="rp-pvp" lang="en" />
+    <realm name="Steamwheedle Cartel" site="eu" type="rp-pve" lang="en" />
+    <realm name="Terokkar" site="eu" type="pve" lang="en" />
+    <realm name="Xavius" site="eu" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Schattenbrand" site="eu">
+    <realm name="Ambossar" site="eu" type="pve" lang="de" />
+    <realm name="Dalvengyr" site="eu" type="pvp" lang="de" />
+    <realm name="Der abyssische Rat" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Die Nachtwache" site="eu" type="rp-pve" lang="de" />
+    <realm name="Lordaeron" site="eu" type="pve" lang="de" />
+    <realm name="Mug'thol" site="eu" type="pvp" lang="de" />
+    <realm name="Rajaxx" site="eu" type="pvp" lang="de" />
+    <realm name="Taerar" site="eu" type="pvp" lang="de" />
+    <realm name="Tirion" site="eu" type="pve" lang="de" />
+    <realm name="Vek'lor" site="eu" type="pvp" lang="de" />
+  </battlegroup>
+  <battlegroup name="Sturmangriff" site="eu">
+    <realm name="Blutkessel" site="eu" type="pvp" lang="de" />
+    <realm name="Das Konsortium" site="eu" type="rp-pvp" lang="de" />
+    <realm name="Die Aldor" site="eu" type="rp-pve" lang="de" />
+    <realm name="Echsenkessel" site="eu" type="pvp" lang="de" />
+    <realm name="Festung der Stürme" site="eu" type="pvp" lang="de" />
+    <realm name="Nethersturm" site="eu" type="pve" lang="de" />
+    <realm name="Shattrath" site="eu" type="pve" lang="de" />
+  </battlegroup>
+  <battlegroup name="Todbringer" site="eu">
+    <realm name="Alexstrasza" site="eu" type="pve" lang="de" />
+    <realm name="Alleria" site="eu" type="pve" lang="de" />
+    <realm name="Antonidas" site="eu" type="pve" lang="de" />
+    <realm name="Baelgun" site="eu" type="pve" lang="de" />
+    <realm name="Blackhand" site="eu" type="pve" lang="de" />
+  </battlegroup>
+  <battlegroup name="Vengeance" site="eu">
+    <realm name="Arathi" site="eu" type="pvp" lang="fr" />
+    <realm name="Culte de la Rive noire" site="eu" type="rp-pvp" lang="fr" />
+    <realm name="Eldre'Thalas" site="eu" type="pvp" lang="fr" />
+    <realm name="Krasus" site="eu" type="pve" lang="fr" />
+    <realm name="Suramar" site="eu" type="pve" lang="fr" />
+    <realm name="Ysondre" site="eu" type="pvp" lang="fr" />
+  </battlegroup>
+  <battlegroup name="Verderbnis" site="eu">
+    <realm name="Gilneas" site="eu" type="pve" lang="de" />
+    <realm name="Kargath" site="eu" type="pve" lang="de" />
+    <realm name="Khaz'goroth" site="eu" type="pve" lang="de" />
+    <realm name="Lothar" site="eu" type="pve" lang="de" />
+    <realm name="Malygos" site="eu" type="pve" lang="de" />
+    <realm name="Rexxar" site="eu" type="pve" lang="de" />
+    <realm name="Ysera" site="eu" type="pve" lang="de" />
+  </battlegroup>
+  <battlegroup name="Vindication" site="eu">
+    <realm name="Auchindoun" site="eu" type="pvp" lang="en" />
+    <realm name="Ghostlands" site="eu" type="pve" lang="en" />
+    <realm name="Hellfire" site="eu" type="pve" lang="en" />
+    <realm name="Karazhan" site="eu" type="pvp" lang="en" />
+    <realm name="Nagrand" site="eu" type="pve" lang="en" />
+    <realm name="Shattered Halls" site="eu" type="pvp" lang="en" />
+    <realm name="Sporeggar" site="eu" type="rp-pvp" lang="en" />
+    <realm name="The Sha'tar" site="eu" type="rp-pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Whirlwind" site="eu">
+    <realm name="Дракономор" site="eu" type="pve" lang="ru" />
+    <realm name="Подземье" site="eu" type="pvp" lang="ru" />
+    <realm name="Седогрив" site="eu" type="pvp" lang="ru" />
+  </battlegroup>
+  <battlegroup name="Bloodlust" site="us">
+    <realm name="Aman'Thul" site="us" type="pve" lang="en" />
+    <realm name="Barthilas" site="us" type="pvp" lang="en" />
+    <realm name="Blackrock" site="us" type="pvp" lang="en" />
+    <realm name="Caelestrasz" site="us" type="pve" lang="en" />
+    <realm name="Dath'Remar" site="us" type="pve" lang="en" />
+    <realm name="Dreadmaul" site="us" type="pvp" lang="en" />
+    <realm name="Frostmourne" site="us" type="pvp" lang="en" />
+    <realm name="Frostwolf" site="us" type="pvp" lang="en" />
+    <realm name="Khaz'goroth" site="us" type="pve" lang="en" />
+    <realm name="Kil'Jaeden" site="us" type="pvp" lang="en" />
+    <realm name="Kilrogg" site="us" type="pve" lang="en" />
+    <realm name="Nagrand" site="us" type="pve" lang="en" />
+    <realm name="Ner'zhul" site="us" type="pvp" lang="en" />
+    <realm name="Proudmoore" site="us" type="pve" lang="en" />
+    <realm name="Sen'jin" site="us" type="pve" lang="en" />
+    <realm name="Silver Hand" site="us" type="rp-pve" lang="en" />
+    <realm name="Thaurissan" site="us" type="pvp" lang="en" />
+    <realm name="Tichondrius" site="us" type="pvp" lang="en" />
+    <realm name="Vek'nilash" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Cyclone" site="us">
+    <realm name="Azjol-Nerub" site="us" type="pve" lang="en" />
+    <realm name="Bloodscalp" site="us" type="pvp" lang="en" />
+    <realm name="Boulderfist" site="us" type="pvp" lang="en" />
+    <realm name="Bronzebeard" site="us" type="pve" lang="en" />
+    <realm name="Crushridge" site="us" type="pvp" lang="en" />
+    <realm name="Daggerspine" site="us" type="pvp" lang="en" />
+    <realm name="Darkspear" site="us" type="pvp" lang="en" />
+    <realm name="Draenor" site="us" type="pve" lang="en" />
+    <realm name="Dragonblight" site="us" type="pve" lang="en" />
+    <realm name="Dunemaul" site="us" type="pvp" lang="en" />
+    <realm name="Feathermoon" site="us" type="rp-pve" lang="en" />
+    <realm name="Perenolde" site="us" type="pve" lang="en" />
+    <realm name="Stonemaul" site="us" type="pvp" lang="en" />
+    <realm name="Stormscale" site="us" type="pvp" lang="en" />
+    <realm name="Suramar" site="us" type="pve" lang="en" />
+    <realm name="Uldum" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Emberstorm" site="us">
+    <realm name="Antonidas" site="us" type="pve" lang="en" />
+    <realm name="Cairne" site="us" type="pve" lang="en" />
+    <realm name="Drenden" site="us" type="pve" lang="en" />
+    <realm name="Farstriders" site="us" type="rp-pve" lang="en" />
+    <realm name="Hydraxis" site="us" type="pve" lang="en" />
+    <realm name="Mok'Nathal" site="us" type="pve" lang="en" />
+    <realm name="Moon Guard" site="us" type="rp-pve" lang="en" />
+    <realm name="Nazgrel" site="us" type="pve" lang="en" />
+    <realm name="Nordrassil" site="us" type="pve" lang="en" />
+    <realm name="Quel'dorei" site="us" type="pve" lang="en" />
+    <realm name="Rivendare" site="us" type="pvp" lang="en" />
+    <realm name="Shandris" site="us" type="pve" lang="en" />
+    <realm name="Tortheldrin" site="us" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Nightfall" site="us">
+    <realm name="Aerie Peak" site="us" type="pve" lang="en" />
+    <realm name="Altar of Storms" site="us" type="pvp" lang="en" />
+    <realm name="Alterac Mountains" site="us" type="pvp" lang="en" />
+    <realm name="Anvilmar" site="us" type="pve" lang="en" />
+    <realm name="Arygos" site="us" type="pve" lang="en" />
+    <realm name="Blackwing Lair" site="us" type="pvp" lang="en" />
+    <realm name="Deathwing" site="us" type="pvp" lang="en" />
+    <realm name="Demon Soul" site="us" type="pvp" lang="en" />
+    <realm name="Doomhammer" site="us" type="pve" lang="en" />
+    <realm name="Gnomeregan" site="us" type="pve" lang="en" />
+    <realm name="Icecrown" site="us" type="pve" lang="en" />
+    <realm name="Jaedenar" site="us" type="pvp" lang="en" />
+    <realm name="Kel'Thuzad" site="us" type="pvp" lang="en" />
+    <realm name="Lethon" site="us" type="pvp" lang="en" />
+    <realm name="Onyxia" site="us" type="pvp" lang="en" />
+    <realm name="Sentinels" site="us" type="rp-pve" lang="en" />
+    <realm name="Tanaris" site="us" type="pve" lang="en" />
+    <realm name="The Venture Co" site="us" type="rp-pvp" lang="en" />
+    <realm name="Uldaman" site="us" type="pve" lang="en" />
+    <realm name="Undermine" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Rampage" site="us">
+    <realm name="Alexstrasza" site="us" type="pve" lang="en" />
+    <realm name="Alleria" site="us" type="pve" lang="en" />
+    <realm name="Balnazzar" site="us" type="pvp" lang="en" />
+    <realm name="Blackhand" site="us" type="pve" lang="en" />
+    <realm name="Cho'gall" site="us" type="pvp" lang="en" />
+    <realm name="Destromath" site="us" type="pvp" lang="en" />
+    <realm name="Dethecus" site="us" type="pvp" lang="en" />
+    <realm name="Garona" site="us" type="pve" lang="en" />
+    <realm name="Gorgonnash" site="us" type="pvp" lang="en" />
+    <realm name="Gul'dan" site="us" type="pvp" lang="en" />
+    <realm name="Hellscream" site="us" type="pve" lang="en" />
+    <realm name="Illidan" site="us" type="pvp" lang="en" />
+    <realm name="Kael'thas" site="us" type="pve" lang="en" />
+    <realm name="Kirin Tor" site="us" type="rp-pve" lang="en" />
+    <realm name="Ravencrest" site="us" type="pve" lang="en" />
+    <realm name="Spinebreaker" site="us" type="pvp" lang="en" />
+    <realm name="Stormreaver" site="us" type="pvp" lang="en" />
+    <realm name="Whisperwind" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Reckoning" site="us">
+    <realm name="Arathor" site="us" type="pve" lang="en" />
+    <realm name="Bonechewer" site="us" type="pvp" lang="en" />
+    <realm name="Dragonmaw" site="us" type="pvp" lang="en" />
+    <realm name="Eldre'Thalas" site="us" type="pve" lang="en" />
+    <realm name="Firetree" site="us" type="pvp" lang="en" />
+    <realm name="Frostmane" site="us" type="pvp" lang="en" />
+    <realm name="Gurubashi" site="us" type="pvp" lang="en" />
+    <realm name="Nathrezim" site="us" type="pvp" lang="en" />
+    <realm name="Scarlet Crusade" site="us" type="rp-pve" lang="en" />
+    <realm name="Shadow Council" site="us" type="rp-pve" lang="en" />
+    <realm name="Shadowsong" site="us" type="pve" lang="en" />
+    <realm name="Silvermoon" site="us" type="pve" lang="en" />
+    <realm name="Skywall" site="us" type="pve" lang="en" />
+    <realm name="Smolderthorn" site="us" type="pvp" lang="en" />
+    <realm name="Spirestone" site="us" type="pvp" lang="en" />
+    <realm name="Terenas" site="us" type="pve" lang="en" />
+    <realm name="Windrunner" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Retaliation" site="us">
+    <realm name="Area 52" site="us" type="pve" lang="en" />
+    <realm name="Auchindoun" site="us" type="pvp" lang="en" />
+    <realm name="Azuremyst" site="us" type="pve" lang="en" />
+    <realm name="Blade's Edge" site="us" type="pve" lang="en" />
+    <realm name="Blood Furnace" site="us" type="pvp" lang="en" />
+    <realm name="Coilfang" site="us" type="pvp" lang="en" />
+    <realm name="Dawnbringer" site="us" type="pve" lang="en" />
+    <realm name="Exodar" site="us" type="pve" lang="en" />
+    <realm name="Fizzcrank" site="us" type="pve" lang="en" />
+    <realm name="Ghostlands" site="us" type="pve" lang="en" />
+    <realm name="Grizzly Hills" site="us" type="pve" lang="en" />
+    <realm name="Shattered Halls" site="us" type="pvp" lang="en" />
+    <realm name="Terokkar" site="us" type="pve" lang="en" />
+    <realm name="The Scryers" site="us" type="rp-pve" lang="en" />
+    <realm name="The Underbog" site="us" type="pvp" lang="en" />
+    <realm name="Velen" site="us" type="pve" lang="en" />
+    <realm name="Zangarmarsh" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Ruin" site="us">
+    <realm name="Argent Dawn" site="us" type="rp-pve" lang="en" />
+    <realm name="Arthas" site="us" type="pvp" lang="en" />
+    <realm name="Azgalor" site="us" type="pvp" lang="en" />
+    <realm name="Bleeding Hollow" site="us" type="pvp" lang="en" />
+    <realm name="Bloodhoof" site="us" type="pve" lang="en" />
+    <realm name="Durotan" site="us" type="pve" lang="en" />
+    <realm name="Elune" site="us" type="pve" lang="en" />
+    <realm name="Lothar" site="us" type="pve" lang="en" />
+    <realm name="Madoran" site="us" type="pve" lang="en" />
+    <realm name="Magtheridon" site="us" type="pvp" lang="en" />
+    <realm name="Mannoroth" site="us" type="pvp" lang="en" />
+    <realm name="Medivh" site="us" type="pve" lang="en" />
+    <realm name="Shattered Hand" site="us" type="pvp" lang="en" />
+    <realm name="Skullcrusher" site="us" type="pvp" lang="en" />
+    <realm name="Stormrage" site="us" type="pve" lang="en" />
+    <realm name="Trollbane" site="us" type="pve" lang="en" />
+    <realm name="Warsong" site="us" type="pvp" lang="en" />
+    <realm name="Zul'jin" site="us" type="pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Shadowburn" site="us">
+    <realm name="Agamaggan" site="us" type="pvp" lang="en" />
+    <realm name="Azshara" site="us" type="pvp" lang="en" />
+    <realm name="Baelgun" site="us" type="pve" lang="en" />
+    <realm name="Dark Iron" site="us" type="pvp" lang="en" />
+    <realm name="Detheroc" site="us" type="pvp" lang="en" />
+    <realm name="Emerald Dream" site="us" type="rp-pvp" lang="en" />
+    <realm name="Greymane" site="us" type="pve" lang="en" />
+    <realm name="Kalecgos" site="us" type="pvp" lang="en" />
+    <realm name="Lightninghoof" site="us" type="rp-pvp" lang="en" />
+    <realm name="Maelstrom" site="us" type="rp-pvp" lang="en" />
+    <realm name="Malfurion" site="us" type="pve" lang="en" />
+    <realm name="Moonrunner" site="us" type="pve" lang="en" />
+    <realm name="Nazjatar" site="us" type="pvp" lang="en" />
+    <realm name="Sargeras" site="us" type="pvp" lang="en" />
+    <realm name="Staghelm" site="us" type="pve" lang="en" />
+    <realm name="Twisting Nether" site="us" type="rp-pvp" lang="en" />
+    <realm name="Ursin" site="us" type="pvp" lang="en" />
+    <realm name="Wildhammer" site="us" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Stormstrike" site="us">
+    <realm name="Andorhal" site="us" type="pvp" lang="en" />
+    <realm name="Anetheron" site="us" type="pvp" lang="en" />
+    <realm name="Archimonde" site="us" type="pvp" lang="en" />
+    <realm name="Black Dragonflight" site="us" type="pvp" lang="en" />
+    <realm name="Dalaran" site="us" type="pve" lang="en" />
+    <realm name="Dalvengyr" site="us" type="pvp" lang="en" />
+    <realm name="Dentarg" site="us" type="pvp" lang="en" />
+    <realm name="Duskwood" site="us" type="pve" lang="en" />
+    <realm name="Executus" site="us" type="pvp" lang="en" />
+    <realm name="Haomarush" site="us" type="pvp" lang="en" />
+    <realm name="Khadgar" site="us" type="pve" lang="en" />
+    <realm name="Mal'Ganis" site="us" type="pvp" lang="en" />
+    <realm name="Norgannon" site="us" type="pve" lang="en" />
+    <realm name="Scilla" site="us" type="pvp" lang="en" />
+    <realm name="Steamwheedle Cartel" site="us" type="rp-pve" lang="en" />
+    <realm name="Thrall" site="us" type="pve" lang="en" />
+    <realm name="Turalyon" site="us" type="pve" lang="en" />
+    <realm name="Ysera" site="us" type="pve" lang="en" />
+    <realm name="Ysondre" site="us" type="pvp" lang="en" />
+    <realm name="Zuluhed" site="us" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Vengeance" site="us">
+    <realm name="Aegwynn" site="us" type="pvp" lang="en" />
+    <realm name="Akama" site="us" type="pvp" lang="en" />
+    <realm name="Chromaggus" site="us" type="pvp" lang="en" />
+    <realm name="Drak'thul" site="us" type="pvp" lang="en" />
+    <realm name="Draka" site="us" type="pve" lang="en" />
+    <realm name="Eitrigg" site="us" type="pve" lang="en" />
+    <realm name="Garithos" site="us" type="pvp" lang="en" />
+    <realm name="Gundrak" site="us" type="pvp" lang="en" />
+    <realm name="Hakkar" site="us" type="pvp" lang="en" />
+    <realm name="Jubei'Thos" site="us" type="pvp" lang="en" />
+    <realm name="Khaz Modan" site="us" type="pve" lang="en" />
+    <realm name="Korgath" site="us" type="pvp" lang="en" />
+    <realm name="Kul Tiras" site="us" type="pve" lang="en" />
+    <realm name="Malorne" site="us" type="pvp" lang="en" />
+    <realm name="Mug'thol" site="us" type="pvp" lang="en" />
+    <realm name="Muradin" site="us" type="pve" lang="en" />
+    <realm name="Rexxar" site="us" type="pve" lang="en" />
+    <realm name="Runetotem" site="us" type="pve" lang="en" />
+    <realm name="Saurfang" site="us" type="pve" lang="en" />
+    <realm name="Thorium Brotherhood" site="us" type="rp-pve" lang="en" />
+  </battlegroup>
+  <battlegroup name="Vindication" site="us">
+    <realm name="Aggramar" site="us" type="pve" lang="en" />
+    <realm name="Burning Blade" site="us" type="pvp" lang="en" />
+    <realm name="Burning Legion" site="us" type="pvp" lang="en" />
+    <realm name="Earthen Ring" site="us" type="rp-pve" lang="en" />
+    <realm name="Eonar" site="us" type="pve" lang="en" />
+    <realm name="Eredar" site="us" type="pvp" lang="en" />
+    <realm name="Gilneas" site="us" type="pve" lang="en" />
+    <realm name="Gorefiend" site="us" type="pvp" lang="en" />
+    <realm name="Kargath" site="us" type="pve" lang="en" />
+    <realm name="Laughing Skull" site="us" type="pvp" lang="en" />
+    <realm name="Lightning's Blade" site="us" type="pvp" lang="en" />
+    <realm name="Llane" site="us" type="pve" lang="en" />
+    <realm name="Malygos" site="us" type="pve" lang="en" />
+    <realm name="Shadowmoon" site="us" type="pvp" lang="en" />
+    <realm name="Thunderhorn" site="us" type="pve" lang="en" />
+    <realm name="Thunderlord" site="us" type="pvp" lang="en" />
+  </battlegroup>
+  <battlegroup name="Whirlwind" site="us">
+    <realm name="Anub'arak" site="us" type="pvp" lang="en" />
+    <realm name="Blackwater Raiders" site="us" type="rp-pve" lang="en" />
+    <realm name="Bladefist" site="us" type="pve" lang="en" />
+    <realm name="Cenarion Circle" site="us" type="rp-pve" lang="en" />
+    <realm name="Cenarius" site="us" type="pve" lang="en" />
+    <realm name="Darrowmere" site="us" type="pvp" lang="en" />
+    <realm name="Echo Isles" site="us" type="pve" lang="en" />
+    <realm name="Fenris" site="us" type="pve" lang="en" />
+    <realm name="Hyjal" site="us" type="pve" lang="en" />
+    <realm name="Korialstrasz" site="us" type="pve" lang="en" />
+    <realm name="Lightbringer" site="us" type="pve" lang="en" />
+    <realm name="Maiev" site="us" type="pvp" lang="en" />
+    <realm name="Misha" site="us" type="pve" lang="en" />
+    <realm name="Ravenholdt" site="us" type="rp-pvp" lang="en" />
+    <realm name="Shu'Halo" site="us" type="pve" lang="en" />
+    <realm name="Sisters of Elune" site="us" type="rp-pve" lang="en" />
+    <realm name="The Forgotten Coast" site="us" type="pvp" lang="en" />
+    <realm name="Uther" site="us" type="pve" lang="en" />
+    <realm name="Vashj" site="us" type="pvp" lang="en" />
+  </battlegroup>
+</battlegroups>

@@ -12,7 +12,9 @@ WoWSpyder is a pre-alpha, work-in-progress product.
 License
 =======
 
-WoWSpyder is released under the [BSD license](http://creativecommons.org/licenses/BSD/), copyright of the Regents of the University of California. Please pay special attention to the non-endorsement clause. Like all tools, it is possible to abuse WoWSpyder. This license means that I, nor the university where I research, takes any responsibility for your use of WoWSpyder.
+WoWSpyder's source code (and only source code) is released under the [BSD license](http://creativecommons.org/licenses/BSD/), copyright of the Regents of the University of California. Please pay special attention to the non-endorsement clause. Like all tools, it is possible to abuse WoWSpyder. This license means that I, nor the university where I research, takes any responsibility for your use of WoWSpyder.
+
+Included in this distribution is Okoloth's Battlegroups XML file, which has a listing of battlegroups and realms for the US and EU. This is licensed separately under a [Creative Commons Attribution 3.0 License](http://creativecommons.org/licenses/by/3.0/). It can be parsed by using the BattlegroupParser.
 
 *Use WoWSpyder responsibly*. If you don't, Blizzard might pull the plug on XML access, which is bad for everyone.
 
@@ -40,11 +42,9 @@ WoWSpyder uses SQLAlchemy to save to a database. That database can be anything S
 To Do
 =====
 * Actually finishing to an alpha stage.
-* Better hiding of private methods.
 * Better documentation, both for users and docstrings for developers.
-* Get the right levels assigned to the logging.
 * Handle all the character sheet things.
-* <strike>Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.</strike> This is really trying to prevent using the Arena access... downloading teams, characters and even guilds should really be OK.
+* <strike>Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.</strike> This is really trying to prevent using the Arena access... downloading teams, characters is OK. Downloading guilds is iffy, so it has the get\_characters clause on it. I should just put that on the arena.
 
 --
 [Chris Lewis](http://chris.to)

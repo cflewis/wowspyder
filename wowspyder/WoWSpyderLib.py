@@ -15,18 +15,21 @@ import re
 log = Logger.log()
 
 def get_site_url(site):
+    """Return the domain name for the relevant Armory."""
     server = "www"
     if site == "eu": server = "eu"
         
     return "http://" + server + ".wowarmory.com/"
     
 def get_arena_url(battlegroup, realm, site, ladder_number=2, page=1):
+    """Return the URL for an arena"""
     log.debug("Returning Arena URL: " + battlegroup + "," + realm + ", " + site)
     return get_site_url(site) + "arena-ladder.xml?b=" \
         + quote(battlegroup.encode("utf-8")) + "&ts=" + str(ladder_number) + "&fv=" \
         + quote(realm.encode("utf-8")) + "&ff=realm&p=" + str(page)
         
 def get_team_url(name, realm, site, size):
+    """Return the URL for a team"""
     team_url = get_site_url(site) + "team-info.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&ts=" + str(size) + \
@@ -37,6 +40,7 @@ def get_team_url(name, realm, site, size):
     return team_url
         
 def get_character_sheet_url(name, realm, site):
+    """Return the URL for a character"""
     character_sheet_url = get_site_url(site) + "character-sheet.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&n=" + quote(name.encode("utf-8"))
@@ -46,6 +50,7 @@ def get_character_sheet_url(name, realm, site):
     
         
 def get_guild_url(name, realm, site, page=1):
+    """Return the URL for a guild"""
     log.debug("Returning guild URL")
     return get_site_url(site) + "guild-info.xml?" + \
     "r=" + quote(realm.encode("utf-8")) + \
@@ -53,9 +58,11 @@ def get_guild_url(name, realm, site, page=1):
     "&p=" + str(page)
     
 def get_max_pages(source):
+    """Return the max pages for pages that paginate."""
     return int(re.search("maxPage=\"(\d*)\"", source).group(1))
 
 def merge(seq):
+    """Merge a list of lists into one big list."""
     merged = []
     for s in seq:
         for x in s:

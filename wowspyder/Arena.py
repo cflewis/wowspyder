@@ -24,29 +24,43 @@ import StringIO
 from xml.dom import minidom
 from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
+import Preferences
+import datetime
+
 
 log = Logger.log()
 Base = Database.get_base()
 
-class ArenaParser:
+class ArenaParser(object):
+    """A class that parses the XML returned by the Armory Arena pages.
+    
+    This class is primarily used for finding teams, as the Arena's 
+    themselves don't hold much interesting data.
+    
+    """
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
-        self.downloader = downloader
+        self._downloader = downloader
         
-        if self.downloader is None:
-            self.downloader = XMLDownloader.XMLDownloaderThreaded( \
+        if self._downloader is None:
+            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
                    
-        self.session = Database.session
+        self._session = Database.session
         Base.metadata.create_all(Database.engine)
-        self.tp = Team.TeamParser(downloader=self.downloader)
+        self._tp = Team.TeamParser(downloader=self._downloader)
         
     def __del__(self):
-        self.downloader.close()
+        self._downloader.close()
         
-    def get_arena_teams(self, battlegroup, realm, site):
-        '''Returns a list of arena teams, stored in the database'''
+    def get_arena_teams(self, battlegroup, realm, site, get_characters=False):
+        '''Returns a list of arena teams as team objects. Setting get_characters
+        to true will cause teams, their characters and their guilds to be
+        downloaded. This cascading effect is very slow and should be used
+        with caution.
+        
+        '''
         for ladder_number in [2, 3, 5]:
-            source = self.downloader.download_url( \
+            source = self._downloader.download_url( \
                 WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
                 ladder_number=ladder_number))
             max_pages = WoWSpyderLib.get_max_pages(source)
@@ -56,18 +70,19 @@ class ArenaParser:
                     ": Downloading arena page " + str(page) + " of " \
                     + str(max_pages))
                 
-                source = self.downloader.download_url( \
+                source = self._downloader.download_url( \
                     WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
                         ladder_number=ladder_number))
                 
-                teams = self.parse_arena_file(StringIO.StringIO(source), site)
+                teams = self.__parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
                 
         # cflewis | 2009-03-24 | Query the DB to ensure that the teams are
         # unique and to avoid having to do annoying expansion and joining of
         # the returned teams list
-        return self.session.query(Team.Team).filter(and_(Team.Team.realm == realm, Team.Team.site == site))
+        return self._session.query(Team.Team).filter(and_(Team.Team.realm == realm, Team.Team.site == site))
             
-    def parse_arena_file(self, xml_file_object, site):
+    def __parse_arena_file(self, xml_file_object, site, get_characters=False):
+        """Parse the XML of an arena page"""
         xml = minidom.parse(xml_file_object)
         team_nodes = xml.getElementsByTagName("arenaTeam")
         teams = []
@@ -76,22 +91,23 @@ class ArenaParser:
             name = team_node.attributes["name"].value
             realm = team_node.attributes["realm"].value
             size = team_node.attributes["size"].value
-            team = self.tp.get_team(name, realm, site, size)
+            team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
             teams.append(team)
             
         return teams
         
         
     def close_downloader(self):
-        self.downloader.close()
+        self._downloader.close()
         
 class ArenaParserTests(unittest.TestCase):
     def setUp(self):
-        self.us_realm = u"Blackwater Raiders"
+        self.us_realm = u"Ravenholdt"
         self.us_battlegroup = u"Whirlwind"
         self.eu_realm = u"Argent Dawn"
         self.eu_battlegroup = u"Bloodlust"
         self.ap = ArenaParser()
+        self.prefs = Preferences.Preferences()
         
     def testGetUSArenaURL(self):
         us_url = WoWSpyderLib.get_arena_url(self.us_battlegroup, \
@@ -115,8 +131,23 @@ class ArenaParserTests(unittest.TestCase):
         # log.debug(guilds)
         # log.debug("Found %d guilds", len(guilds))
         
-    def testGetTeams(self):
-        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us")
+    def testGetTeamsNoCharacters(self):
+        print "Started no character test at " + str(datetime.datetime.now())
+        log.info("Started no character test at " + str(datetime.datetime.now()))
+        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=False)
+        log.info("Ended no character test at " + str(datetime.datetime.now()))
+        print "Ended no character test at " + str(datetime.datetime.now())
+        
+    def testGetTeamsAndCharacters(self):
+        original_option = self.prefs.refresh_all
+        self.prefs.refresh_all = False
+        print "Started character test at " + str(datetime.datetime.now())
+        log.info("Started character test at " + str(datetime.datetime.now()))
+        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
+        self.prefs.refresh_all = original_option
+        print "Ended character test at " + str(datetime.datetime.now())
+        log.info("Ended character test at " + str(datetime.datetime.now()))
+        
         
 
 if __name__ == '__main__':

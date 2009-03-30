@@ -38,34 +38,46 @@ log = Logger.log()
 
 Base = Database.get_base()
 
-class CharacterParser:
+class CharacterParser(object):
+    """A class to parse the character sheets from the Armory and return
+    character objects. 
+    
+    Returning a character object will only *stub out* the
+    guild, and not recursively grab the guild, as other parser classes. This
+    is because defining the guild at the same time would define characters
+    which would create a loop.
+    
+    """
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
-        '''Initialize the team parser.'''
+        '''Initialize the character parser.'''
         
-        self.session = Database.session
+        self._session = Database.session
         Base.metadata.create_all(Database.engine)
-        self.prefs = Preferences.Preferences()
-        self.downloader = downloader
+        self._prefs = Preferences.Preferences()
+        self._downloader = downloader
         
-        if self.downloader is None:
-            self.downloader = XMLDownloader.XMLDownloaderThreaded( \
+        if self._downloader is None:
+            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
                         
     def get_character(self, name, realm, site):
+        """Return a character object. This only stubs the guild, which means
+        the guild won't be populated with characters."""
         character = None
         
-        if not self.prefs.refresh_all:
-            character = self.session.query(Character).get((name, realm, site))
+        if not self._prefs.refresh_all:
+            character = self._session.query(Character).get((name, realm, site))
         
         if not character:      
-            source = self.downloader.download_url(\
+            source = self._downloader.download_url(\
                 WoWSpyderLib.get_character_sheet_url(name, realm, site))
-            character = self.parse_character(StringIO.StringIO(source), site)
+            character = self.__parse_character(StringIO.StringIO(source), site)
             
         return character
         
-    def parse_character(self, xml_file_object, site):
-        gp = GuildParser(downloader=self.downloader)
+    def __parse_character(self, xml_file_object, site):
+        """Parse the XML of a character sheet from the Armory."""
+        gp = GuildParser(downloader=self._downloader)
         
         xml = minidom.parse(xml_file_object)
         character_nodes = xml.getElementsByTagName("character")
@@ -112,13 +124,14 @@ class CharacterParser:
         
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified)
-        log.debug("Creating character " + name)
+        log.info("Creating character " + unicode(character).encode("utf-8"))
         Database.insert(character)
                 
         return character
 
 
 class Character(Base):
+    """A WoW Character."""
     __table__ = Table("CHARACTER", Base.metadata,
         Column("name", Unicode(100), primary_key=True),
         Column("realm", Unicode(100), primary_key=True),
@@ -173,20 +186,29 @@ class CharacterParserTests(unittest.TestCase):
     def testCharacter(self):
         c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
         
-class GuildParser:
+class GuildParser(object):
+    """A parser to return guilds. By default, returning a guild will
+    also fill out the characters within it.
+    
+    """
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         '''Initialize the guild parser.'''
 
-        self.session = Database.session
+        self._session = Database.session
         Base.metadata.create_all(Database.engine)
-        self.prefs = Preferences.Preferences()
-        self.downloader = downloader
+        self._prefs = Preferences.Preferences()
+        self._downloader = downloader
 
-        if self.downloader is None:
-            self.downloader = XMLDownloader.XMLDownloaderThreaded( \
+        if self._downloader is None:
+            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)        
 
     def get_guild(self, name, realm, site, get_characters=True):
+        """Get a guild. Setting get_characters=False will disable the
+        behavior that causes the guild characters to also be created. You
+        may want to do this for speed increases.
+        
+        """
         if name is None or name == "": 
             return None
 
@@ -195,18 +217,19 @@ class GuildParser:
         # cflewis | 2009-03-28 | Get characters is only false when we're
         # worried about circular referencing from character creation, 
         # so we don't need to be concerned with finding fresh characters
-        if not self.prefs.refresh_all or get_characters is False:
-            guild = self.session.query(Guild).get((name, realm, site))
+        if not self._prefs.refresh_all or get_characters is False:
+            guild = self._session.query(Guild).get((name, realm, site))
 
         if not guild:
             log.debug("Didn't find guild, creating...")     
-            source = self.downloader.download_url(\
+            source = self._downloader.download_url(\
                  WoWSpyderLib.get_guild_url(name, realm, site))
-            guild = self.parse_guild(StringIO.StringIO(source), site, get_characters)
+            guild = self.__parse_guild(StringIO.StringIO(source), site, get_characters=get_characters)
 
         return guild
 
-    def parse_guild(self, xml_file_object, site, get_characters=True):
+    def __parse_guild(self, xml_file_object, site, get_characters=True):
+        """Parse a guild page."""
         xml = minidom.parse(xml_file_object)
         guild_nodes = xml.getElementsByTagName("guildKey")
         guild_node = guild_nodes[0]
@@ -215,13 +238,13 @@ class GuildParser:
         realm = guild_node.attributes["realm"].value
         site = site
         guild = Guild(name, realm, site)
-        log.debug("Inserting guild " + guild.name)
+        log.info("Creating guild " + unicode(guild).encode("utf-8"))
         Database.insert(guild)
 
         # cflewis | 2009-03-28 | Now need to put in guild's characters
         if get_characters:
             log.debug("Parsing guild character")
-            characters = self.parse_guild_characters(name, realm, site)
+            characters = self.__parse_guild_characters(name, realm, site)
             guild.characters = characters
         else:
             log.debug("Not parsing guild characters")
@@ -232,8 +255,9 @@ class GuildParser:
 
         return guild
 
-    def parse_guild_characters(self, name, realm, site):
-        source = self.downloader.download_url( \
+    def __parse_guild_characters(self, name, realm, site):
+        """Page through a guild, creating characters."""
+        source = self._downloader.download_url( \
             WoWSpyderLib.get_guild_url(name, realm, site))
         max_pages = WoWSpyderLib.get_max_pages(source)
         character_list = []
@@ -243,18 +267,19 @@ class GuildParser:
                 ": Downloading guild page " + str(page) + " of " \
                 + str(max_pages))
 
-            source = self.downloader.download_url( \
+            source = self._downloader.download_url( \
                 WoWSpyderLib.get_guild_url(name, realm, site, page=page))
 
-            character_list.append(self.parse_guild_file(StringIO.StringIO(source), site))
+            character_list.append(self.__parse_guild_file(StringIO.StringIO(source), site))
 
         return WoWSpyderLib.merge(character_list)
 
-    def parse_guild_file(self, xml_file_object, site):
+    def __parse_guild_file(self, xml_file_object, site):
+        """Create characters from a single guild page."""
         xml = minidom.parse(xml_file_object)
         guild_nodes = xml.getElementsByTagName("guildKey")
         guild_node = guild_nodes[0]
-        cp = CharacterParser(downloader=self.downloader)
+        cp = CharacterParser(downloader=self._downloader)
         
         realm = guild_node.attributes["realm"].value
         
@@ -269,16 +294,24 @@ class GuildParser:
         return characters
 
     def get_guild_rank_from_character(self, character):
+        """Returns the rank of a character in a guild. Deconstructs
+        the object and passes it to get_guild_rank.
+        
+        """
         return self.get_guild_rank(character.guild, character.realm, \
             character.site, character.name)
 
     def get_guild_rank(self, guild_name, realm, site, character_name):
-        source = self.downloader.download_url( \
+        """Returns the rank of a character (not specified by object)
+        in a guild.
+        
+        """
+        source = self._downloader.download_url( \
             WoWSpyderLib.get_guild_url(guild_name, realm, site))
         max_pages = WoWSpyderLib.get_max_pages(source)
 
         for page in range(1, (max_pages + 1)):
-            source = self.downloader.download_url( \
+            source = self._downloader.download_url( \
                 WoWSpyderLib.get_guild_url(guild_name, realm, site, page=page))
 
             guild_rank_search = re.search("name=\"" + character_name + \
@@ -290,6 +323,7 @@ class GuildParser:
 
 
 class Guild(Base):
+    """A guild."""
     __table__ = Table("GUILD", Base.metadata,
         Column("name", Unicode(100), primary_key=True),
         Column("realm", Unicode(100), primary_key=True),

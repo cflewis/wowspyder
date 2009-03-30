@@ -27,16 +27,16 @@ import Queue
 
 log = Logger.log()
 
-class XMLDownloader():
+class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie
     and using it whenever this object is asked to download from the Armory.
     
     '''
     def __init__(self, backoff_attempts=3, backoff_initial_time=30, \
             backoff_increment = 60):
-        self.cj = cookielib.CookieJar()
+        self._cj = cookielib.CookieJar()
         h = urllib2.HTTPHandler(debuglevel=0)
-        self.opener = urllib2.build_opener(h, urllib2.HTTPCookieProcessor(self.cj))
+        self._opener = urllib2.build_opener(h, urllib2.HTTPCookieProcessor(self._cj))
         
         self.backoff_attempts = backoff_attempts
         self.backoff_initial_time = backoff_initial_time
@@ -45,11 +45,17 @@ class XMLDownloader():
         self.refresh_login()
         
     def refresh_login(self):
+        """Refresh the login, getting a new session cookie from the Armory."""
         # cflewis | 2009-03-13 | Get the cookie saved.
         self.download_url("http://www.wowarmory.com/login-status.xml")
-        log.debug("Got cookie " + str(self.cj))
+        log.debug("Got cookie " + str(self._cj))
         
-    def download_url(self, url, backoffs_allowed=None, backoff_time=None):
+    def download_url(self, url, backoffs_allowed=None, backoff_time=None, continue=True):
+        """Download a URL and return the source. Specifying
+        backoffs_allowed and backoff_time allows the downloader to retry
+        downloading URLs on failure.
+        
+        """
         if backoffs_allowed is None: backoffs_allowed = self.backoff_attempts
         if backoff_time is None: backoff_time = self.backoff_initial_time
                 
@@ -60,12 +66,12 @@ http://github.com/Lewisham/wowspyder")
         request.add_header('Accept-encoding', 'gzip')
 
         try:
-            source = self.decompress_gzip(self.opener.open(request).read())
+            source = self.decompress_gzip(self._opener.open(request).read())
         except urllib2.HTTPError, error:
             warning = "Download URL failed, got HTTP %d. URL: %s" % (error.code, url)
             log.warning(warning)
             
-            self.opener.close()
+            self._opener.close()
             
             if error.code == 404:
                 # cflewis | 2009-03-15 | Can't do anything about this
@@ -73,7 +79,7 @@ http://github.com/Lewisham/wowspyder")
             else:
                 # cflewis | 2009-03-15 | Blizzard blocked us. Back off.
                 if backoffs_allowed > 0:
-                    log.error("Error %d: URL: %s, Sleeping for: %d" % (error.code, url, backoff_time))
+                    log.warning("Sleeping for: %d" % (error.code, url, backoff_time))
                     time.sleep(backoff_time)
                     return self.download_url(url, \
                     backoffs_allowed=backoffs_allowed - 1, \
@@ -82,23 +88,24 @@ http://github.com/Lewisham/wowspyder")
                     raise
         except urllib2.URLError, error:
             log.warning("Time out")
-            self.opener.close
+            self._opener.close
             return self.download_url(url, backoffs_allowed=backoffs_allowed, \
                 backoff_time=backoff_time)
         
-        self.opener.close()
+        self._opener.close()
             
         log.debug("Downloaded %s" % url)
                 
         return unicode(source, "utf-8").encode("utf-8")
         
     def decompress_gzip(self, compressed_data):
+        """Decompress gzipped data."""
         compressed_stream = StringIO.StringIO(compressed_data)
         gzipper = gzip.GzipFile(fileobj = compressed_stream)
         return gzipper.read()
 
         
-class XMLDownloaderThreaded():
+class XMLDownloaderThreaded(object):
     '''A class to mediate threaded downloading of URLs.
     
     Calling close() when this object is no longer needed would be nice,
@@ -117,16 +124,19 @@ class XMLDownloaderThreaded():
         self.close()
         
     def download_url(self, url):
+        """Download a URL from one of the threads."""
         response_queue = Queue.Queue()
         self.request_queue.put((url, response_queue))
         return response_queue.get()
     
     def close(self):
+        """Close the object, ending the threads."""
         for _ in self.threads:
             self.request_queue.put((None, None))
 
 
 class XMLDownloaderThread(threading.Thread):
+    """A thread to the XMLDownloader."""
     def __init__(self, request_queue, sleep_time = 10):
         threading.Thread.__init__(self)
         self.downloader = XMLDownloader()
@@ -186,7 +196,7 @@ class XMLDownloaderTests(unittest.TestCase):
 
         # cflewis | 2009-03-14 | Getting anything but one cookie means
         # something went wrong.
-        self.assertEqual(len(self.downloader.cj), 1)
+        self.assertEqual(len(self.downloader._cj), 1)
         
     def testThreaded(self):
         self.dt = XMLDownloaderThreaded()

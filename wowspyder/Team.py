@@ -33,7 +33,7 @@ log = Logger.log()
 
 Base = Database.get_base()
 
-class TeamParser:
+class TeamParser(object):
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         '''Initialize the team parser.'''
         self.downloader = downloader
@@ -42,58 +42,67 @@ class TeamParser:
             self.downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
         
-        self.session = Database.session
+        self._session = Database.session
         Base.metadata.create_all(Database.engine)
-        self.prefs = Preferences.Preferences()
+        self._prefs = Preferences.Preferences()
         
-        self.cp = GuildCharacter.CharacterParser(downloader=self.downloader)
+        self._cp = GuildCharacter.CharacterParser(downloader=self.downloader)
         
-    def get_team(self, name, realm, site, size=None):
+    def get_team(self, name, realm, site, size=None, get_characters=True):
+        """Returns a team object. Setting get_characters to False will
+        cause characters in the team to not be created. This means you
+        can just get the team name quickly, but is most probably
+        not what you want to do.
+        
+        """
         team = None
         
-        if not self.prefs.refresh_all:
+        if not self._prefs.refresh_all:
             # cflewis | 2009-03-28 | This won't check if there are the right
             # characters in the team
-            team = self.session.query(Team).get((name, realm, site))
+            team = self._session.query(Team).get((name, realm, site))
         
         if not team:
             if not size: raise NameError("No team on that PK, " + \
                 "need size to create new team.")         
             source = self.downloader.download_url(\
                 WoWSpyderLib.get_team_url(name, realm, site, size))
-            log.debug("Creating team from " + unicode(name) + " " + unicode(realm) + " " + unicode(site))
-            team = self.parse_team(StringIO.StringIO(source), site)
+            team = self.__parse_team(StringIO.StringIO(source), site, get_characters=get_characters)
             
         return team
         
-    def parse_team(self, xml_file_object, site):
+    def __parse_team(self, xml_file_object, site, get_characters=True):
+        """Parse a team and add its characters if necessary."""
         xml = minidom.parse(xml_file_object)
         team_nodes = xml.getElementsByTagName("arenaTeam")
         team_node = team_nodes[0]
         
         try:
             name = team_node.attributes["name"].value
+            realm = team_node.attributes["realm"].value
+            size = int(team_node.attributes["teamSize"].value)
+            faction = team_node.attributes["faction"].value
         except KeyError, e:
-            print unicode(xml.toxml())
-            log.critical("Broken Team XML :" + xml.toxml())
-        realm = team_node.attributes["realm"].value
-        size = int(team_node.attributes["teamSize"].value)
-        faction = team_node.attributes["faction"].value
+            log.warning("No team here")
+            return None
+        
         team = Team(name, realm, site, size, faction)
-        log.debug("Creating team " + name)
+        log.info("Creating team " + unicode(team).encode("utf-8"))
         
-        characters = self.parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
+        if get_characters:
+            characters = self.__parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
         
-        # cflewis | 2009-03-28 | Add the characters to the team
-        for character in characters:
-            team.characters.append(character)
+            # cflewis | 2009-03-28 | Add the characters to the team
+            for character in characters:
+                team.characters.append(character)
         
         # cflewis | 2009-03-28 | Merge to update the characters added
         Database.insert(team)
 
         return team
         
-    def parse_team_characters(self, xml_file_object, site):
+    def __parse_team_characters(self, xml_file_object, site):
+        """Parse a list of characters associated with a team"""
         xml = minidom.parse(xml_file_object)
         character_nodes = xml.getElementsByTagName("character")
         characters = []
@@ -101,7 +110,7 @@ class TeamParser:
         for character_node in character_nodes:
             name = character_node.attributes["name"].value
             realm = character_node.attributes["realm"].value
-            character = self.cp.get_character(name, realm, site)
+            character = self._cp.get_character(name, realm, site)
             characters.append(character)
             
         return characters
@@ -119,6 +128,7 @@ team_characters = Table("TEAM_CHARACTERS", Base.metadata,
 
 
 class Team(Base):
+    """A team."""
     __table__ = Table("TEAM", Base.metadata,
         Column("name", Unicode(100), primary_key=True),
         Column("realm", Unicode(100), primary_key=True),
