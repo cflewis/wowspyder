@@ -48,17 +48,13 @@ class CharacterParser(object):
     which would create a loop.
     
     """
-    def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
+    def __init__(self, downloader=None):
         '''Initialize the character parser.'''
-        
-        self._session = Database.session
+        Parser.__init__(downloader=downloader)
         Base.metadata.create_all(Database.engine)
-        self._prefs = Preferences.Preferences()
-        self._downloader = downloader
         
-        if self._downloader is None:
-            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
-                number_of_threads=number_of_threads, sleep_time=sleep_time)
+    def _check_download(self, source, exception):
+        return source
                         
     def get_character(self, name, realm, site):
         """Return a character object. This only stubs the guild, which means
@@ -69,7 +65,7 @@ class CharacterParser(object):
             character = self._session.query(Character).get((name, realm, site))
         
         if not character:
-            source = self._downloader.download_url(\
+            source = self._download_url(\
                 WoWSpyderLib.get_character_sheet_url(name, realm, site))
             character = self.__parse_character(StringIO.StringIO(source), site)
             
@@ -201,22 +197,18 @@ class CharacterParserTests(unittest.TestCase):
     def testCharacter(self):
         c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
         
-class GuildParser(object):
+class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
     also fill out the characters within it.
     
     """
-    def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
+    def __init__(self, downloader=None):
         '''Initialize the guild parser.'''
-
-        self._session = Database.session
+        Parser.__init__(downloader=downloader)
         Base.metadata.create_all(Database.engine)
-        self._prefs = Preferences.Preferences()
-        self._downloader = downloader
-
-        if self._downloader is None:
-            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
-                number_of_threads=number_of_threads, sleep_time=sleep_time)        
+        
+    def _check_download(self, source, exception):
+        return source
 
     def get_guild(self, name, realm, site, get_characters=True, force_refresh=False):
         """Get a guild. Setting get_characters=False will disable the
@@ -237,7 +229,7 @@ class GuildParser(object):
 
         if not guild:
             log.debug("Didn't find guild, creating...")     
-            source = self._downloader.download_url(\
+            source = self._download_url(\
                  WoWSpyderLib.get_guild_url(name, realm, site))
             guild = self.__parse_guild(StringIO.StringIO(source), site, get_characters=get_characters)
 
@@ -277,7 +269,7 @@ class GuildParser(object):
 
     def __parse_guild_characters(self, name, realm, site):
         """Page through a guild, creating characters."""
-        source = self._downloader.download_url( \
+        source = self._download_url( \
             WoWSpyderLib.get_guild_url(name, realm, site))
         max_pages = WoWSpyderLib.get_max_pages(source)
         character_list = []
@@ -287,7 +279,7 @@ class GuildParser(object):
                 ": Downloading guild page " + str(page) + " of " \
                 + str(max_pages))
 
-            source = self._downloader.download_url( \
+            source = self._download_url( \
                 WoWSpyderLib.get_guild_url(name, realm, site, page=page))
 
             character_list.append(self.__parse_guild_file(StringIO.StringIO(source), site))
@@ -331,12 +323,12 @@ class GuildParser(object):
         in a guild.
         
         """
-        source = self._downloader.download_url( \
+        source = self._download_url( \
             WoWSpyderLib.get_guild_url(guild_name, realm, site))
         max_pages = WoWSpyderLib.get_max_pages(source)
 
         for page in range(1, (max_pages + 1)):
-            source = self._downloader.download_url( \
+            source = self._download_url( \
                 WoWSpyderLib.get_guild_url(guild_name, realm, site, page=page))
 
             guild_rank_search = re.search("name=\"" + character_name + \

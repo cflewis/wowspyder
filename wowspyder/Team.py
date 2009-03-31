@@ -28,25 +28,20 @@ from Enum import Enum
 import urllib2
 import StringIO
 import Preferences
+from Parser import Parser
 
 log = Logger.log()
 
 Base = Database.get_base()
 
-class TeamParser(object):
-    def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
+class TeamParser(Parser):
+    def __init__(self, downloader=None):
         '''Initialize the team parser.'''
-        self.downloader = downloader
-        
-        if self.downloader is None:
-            self.downloader = XMLDownloader.XMLDownloaderThreaded( \
-                number_of_threads=number_of_threads, sleep_time=sleep_time)
-        
-        self._session = Database.session
-        Base.metadata.create_all(Database.engine)
-        self._prefs = Preferences.Preferences()
-        
+        Parser.__init__(downloader=downloader)        
         self._cp = GuildCharacter.CharacterParser(downloader=self.downloader)
+        
+    def _check_download(self, source, exception):
+        return source
         
     def get_team(self, name, realm, site, size=None, get_characters=True):
         """Returns a team object. Setting get_characters to False will

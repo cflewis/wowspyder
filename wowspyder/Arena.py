@@ -26,31 +26,31 @@ from sqlalchemy import and_
 from sqlalchemy.ext.declarative import declarative_base
 import Preferences
 import datetime
-
+from Parser import Parser
 
 log = Logger.log()
-Base = Database.get_base()
 
-class ArenaParser(object):
+class ArenaParser(Parser):
     """A class that parses the XML returned by the Armory Arena pages.
     
     This class is primarily used for finding teams, as the Arena's 
     themselves don't hold much interesting data.
     
     """
-    def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
-        self._downloader = downloader
-        
-        if self._downloader is None:
-            self._downloader = XMLDownloader.XMLDownloaderThreaded( \
-                number_of_threads=number_of_threads, sleep_time=sleep_time)
-                   
-        self._session = Database.session
-        Base.metadata.create_all(Database.engine)
+    def __init__(self, downloader=None):
+        Parser.__init__(self, downloader=downloader)
         self._tp = Team.TeamParser(downloader=self._downloader)
         
-    def __del__(self):
-        self._downloader.close()
+    def _check_download(self, source, exception):
+        if exception:
+            log.error("Unable to download file for arena team")
+            raise exception
+            
+        if re.search("arenaLadderPagedResult.*?filterValue=\"\""):
+            log.error("Realm was invalid or not returned")
+            raise IOError("Realm requested was invalid or not returned")
+            
+        return source
         
     def get_arena_teams(self, battlegroup, realm, site, get_characters=False):
         '''Returns a list of arena teams as team objects. Setting get_characters
@@ -59,14 +59,16 @@ class ArenaParser(object):
         with caution.
         
         '''
+        all_teams = []
+        
         for ladder_number in [2, 3, 5]:
             try:
-                source = self._downloader.download_url( \
+                source = self._download_url( \
                     WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
                     ladder_number=ladder_number))
             except Exception, e:
                 log.warning("Couldn't get arena page for ladder " + 
-                    ladder_number + ", continuing...")
+                    str(ladder_number) + ", continuing...")
                 continue
             
             max_pages = WoWSpyderLib.get_max_pages(source)
@@ -77,7 +79,7 @@ class ArenaParser(object):
                     + str(max_pages))
                 
                 try:
-                    source = self._downloader.download_url( \
+                    source = self._download_url( \
                         WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
                             ladder_number=ladder_number))
                 except Exception, e:
@@ -85,11 +87,9 @@ class ArenaParser(object):
                     continue
                 
                 teams = self.__parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
+                all_teams.append(teams)
                 
-        # cflewis | 2009-03-24 | Query the DB to ensure that the teams are
-        # unique and to avoid having to do annoying expansion and joining of
-        # the returned teams list
-        return self._session.query(Team.Team).filter(and_(Team.Team.realm == realm, Team.Team.site == site))
+        return WoWSpyderLib.merge(all_teams)
             
     def __parse_arena_file(self, xml_file_object, site, get_characters=False):
         """Parse the XML of an arena page"""
@@ -106,13 +106,9 @@ class ArenaParser(object):
                 team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
                 teams.append(team)
             except Exception, e:
-                log.warning("Couldn't get team " + name + ", con")
+                log.warning("Couldn't get team " + name)
             
         return teams
-        
-        
-    def close_downloader(self):
-        self._downloader.close()
         
 class ArenaParserTests(unittest.TestCase):
     def setUp(self):
