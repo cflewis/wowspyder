@@ -29,6 +29,7 @@ import urllib2
 import StringIO
 import Preferences
 from Parser import Parser
+import re
 
 log = Logger.log()
 
@@ -37,55 +38,65 @@ Base = Database.get_base()
 class TeamParser(Parser):
     def __init__(self, downloader=None):
         '''Initialize the team parser.'''
-        Parser.__init__(downloader=downloader)        
-        self._cp = GuildCharacter.CharacterParser(downloader=self.downloader)
+        log.debug("Creating TeamParser with " + str(downloader))
+        Parser.__init__(self, downloader=downloader)
+        self._cp = GuildCharacter.CharacterParser(downloader=self._downloader)        
         
     def _check_download(self, source, exception):
+        if exception:
+            log.error("Unable to download team file")
+            raise exception
+            
+        if re.search("arenaTeam.*?teamUrlEscape=\"\"", source):
+            log.error("Team was invalid or not returned")
+            raise IOError("Team requested was invalid or not returned")
+        
         return source
         
-    def get_team(self, name, realm, site, size=None, get_characters=True):
-        """Returns a team object. Setting get_characters to False will
-        cause characters in the team to not be created. This means you
-        can just get the team name quickly, but is most probably
-        not what you want to do.
+    def get_team(self, name, realm, site, size=None, get_characters=False, cached=False):
+        """Returns a team object. Setting get_characters to True will
+        cause characters in the team to be created at the same time. This is
+        slower, but likely what you will want.
+        
+        Setting cached to True will return the cached version of the team, 
+        if you're sure it's already in the database.
         
         """
-        team = None
+        team = self._session.query(Team).get((name, realm, site))
         
-        if not self._prefs.refresh_all:
-            # cflewis | 2009-03-28 | This won't check if there are the right
-            # characters in the team
-            team = self._session.query(Team).get((name, realm, site))
+        if cached:
+            return team
         
-        if not team:
-            if not size: raise NameError("No team on that PK, " + \
-                "need size to create new team.")         
-            source = self.downloader.download_url(\
-                WoWSpyderLib.get_team_url(name, realm, site, size))
-            team = self.__parse_team(StringIO.StringIO(source), site, get_characters=get_characters)
+        if not team and not size: raise NameError("No team on that PK, " + \
+            "need size to create new team.")
             
+        log.debug("Getting team...")
+            
+        # cflewis | 2009-04-02 | If downloading fails, the whole team
+        # couldn't be found, so the exception should propagate up.
+        source = self._download_url(\
+            WoWSpyderLib.get_team_url(name, realm, site, size))
+        team = self._parse_team(StringIO.StringIO(source), site, get_characters=get_characters)
+        
         return team
         
-    def __parse_team(self, xml_file_object, site, get_characters=True):
+    def _parse_team(self, xml_file_object, site, get_characters=False):
         """Parse a team and add its characters if necessary."""
+        log.debug("Parsing team...")
         xml = minidom.parse(xml_file_object)
         team_nodes = xml.getElementsByTagName("arenaTeam")
         team_node = team_nodes[0]
         
-        try:
-            name = team_node.attributes["name"].value
-            realm = team_node.attributes["realm"].value
-            size = int(team_node.attributes["teamSize"].value)
-            faction = team_node.attributes["faction"].value
-        except KeyError, e:
-            log.warning("No team here")
-            return None
+        name = team_node.attributes["name"].value
+        realm = team_node.attributes["realm"].value
+        size = int(team_node.attributes["teamSize"].value)
+        faction = team_node.attributes["faction"].value
         
         team = Team(name, realm, site, size, faction)
         log.info("Creating team " + unicode(team).encode("utf-8"))
         
         if get_characters:
-            characters = self.__parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
+            characters = self._parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
         
             # cflewis | 2009-03-28 | Add the characters to the team
             for character in characters:
@@ -96,22 +107,29 @@ class TeamParser(Parser):
 
         return team
         
-    def __parse_team_characters(self, xml_file_object, site):
+    def _parse_team_characters(self, xml_file_object, site):
         """Parse a list of characters associated with a team"""
+        log.debug("Parsing team characters...")
         xml = minidom.parse(xml_file_object)
         character_nodes = xml.getElementsByTagName("character")
         characters = []
-        
+                
         for character_node in character_nodes:
+            log.debug("Looping through character nodes")
             name = character_node.attributes["name"].value
             realm = character_node.attributes["realm"].value
-            
+                        
             try:
+                log.debug("Getting character...")
+                # cflewis | 2009-04-02 | This is *ridiculous*, but
+                # it simply won't work outside of this for loop.
+                # No idea what to do.
                 character = self._cp.get_character(name, realm, site)
-                characters.append(character)
             except Exception, e:
                 log.warning("Couldn't get character " + name + ", continuing...")
                 continue
+            else:
+                characters.append(character)
             
         return characters
 
@@ -162,11 +180,36 @@ class Team(Base):
         return WoWSpyderLib.get_team_url(self.name, self.realm, self.site, \
                 self.size)
                 
+    def get_characters(self):
+        tp = TeamParser()
+        
+        if characters is None:
+            team = self.refresh(get_characters=True)
+            assert team == self
+        
+        return self.characters
+
+    def refresh(self, get_characters=False):
+        """Refresh this team from the Armory"""
+        tp = TeamParser()
+
+        try:
+            return_team = tp.get_team(self.name, self.realm, self.site, \
+                get_characters=get_characters, cached=False)
+        except Exception, e:
+            log.warning("Couldn't refresh team")
+
+        assert return_team == self
+
+        return self
+                
 class TeamParserTests(unittest.TestCase):
     def setUp(self):
         self.tp = TeamParser()
-        self.test_team = self.tp.get_team(u"Party Like Rockstars", u"Cenarius", 
-            u"us", 5)
+        
+    # cflewis | 2009-04-02 | Something is wrong with get_characters
+        self.test_team = self.tp.get_team(u"Afflicted", u"Ravenholdt", 
+            u"us", 5, get_characters=True)
             
     def testRelation(self):
         log.debug("Realm: " + str(self.test_team.realm_object))
@@ -175,7 +218,7 @@ class TeamParserTests(unittest.TestCase):
         self.assertTrue(characters)
         
     def testRepitition(self):
-        test_team2 = self.tp.get_team(u"Party Like Rockstars", u"Cenarius", 
+        test_team2 = self.tp.get_team(u"Afflicted", u"Ravenholdt", 
             u"us", 5)
         
     # def testPrimaryKey(self):

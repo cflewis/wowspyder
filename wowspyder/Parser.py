@@ -13,14 +13,17 @@ import unittest
 import Database
 import XMLDownloader
 import Preferences
+import Logger
 
 Base = Database.get_base()
+log = Logger.log()
 
 class Parser(object):
     def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
         self._downloader = downloader
 
         if self._downloader is None:
+            log.debug("Creating new downloader...")
             self._downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
 
@@ -31,15 +34,23 @@ class Parser(object):
     def __del__(self):
         self._downloader.close()
         
+    def _refresh_downloader(self):
+        log.debug("Refreshing downloader")
+        self._downloader = XMLDownloader.XMLDownloaderThreaded( \
+            number_of_threads=20, sleep_time=10)
+        
     def _download_url(self, url):
+        log.debug("Parser downloading " + url)
         source = None
         error = None
-        
+                
         try:
             source = self._downloader.download_url(url)
         except Exception, e:
+            log.warning("Downloading returned an exception " + e)
             error = e
             
+        log.debug("Parser returning download source...")
         return self._check_download(self._downloader.download_url(url), error)
         
     def _check_download(self, source, exception):

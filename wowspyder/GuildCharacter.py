@@ -33,12 +33,13 @@ import urllib2
 import StringIO
 import Preferences
 import re
+from Parser import Parser
 
 log = Logger.log()
 
 Base = Database.get_base()
 
-class CharacterParser(object):
+class CharacterParser(Parser):
     """A class to parse the character sheets from the Armory and return
     character objects. 
     
@@ -50,30 +51,40 @@ class CharacterParser(object):
     """
     def __init__(self, downloader=None):
         '''Initialize the character parser.'''
-        Parser.__init__(downloader=downloader)
+        log.debug("Creating character parser with downloader " + str(downloader))
+        Parser.__init__(self, downloader=downloader)
+        self._gp = GuildParser(downloader=self._downloader)
         Base.metadata.create_all(Database.engine)
         
     def _check_download(self, source, exception):
+        if exception:
+            log.error("Unable to download file for character")
+            raise exception
+            
+        if re.search("errCode=\"noCharacter\"", source):
+            log.error("Character was invalid or not returned")
+            raise IOError("Character requested was invalid or not returned")
+            
         return source
                         
-    def get_character(self, name, realm, site):
+    def get_character(self, name, realm, site, cached=False):
         """Return a character object. This only stubs the guild, which means
         the guild won't be populated with characters."""
+        log.debug("Getting character " + name + "...")
         character = None
         
-        if not self._prefs.refresh_all:
-            character = self._session.query(Character).get((name, realm, site))
+        if cached:
+            return self._session.query(Character).get((name, realm, site))
         
-        if not character:
-            source = self._download_url(\
-                WoWSpyderLib.get_character_sheet_url(name, realm, site))
-            character = self.__parse_character(StringIO.StringIO(source), site)
+        source = self._download_url(\
+            WoWSpyderLib.get_character_sheet_url(name, realm, site))
+        character = self._parse_character(StringIO.StringIO(source), site)
             
         return character
         
-    def __parse_character(self, xml_file_object, site):
+    def _parse_character(self, xml_file_object, site):
         """Parse the XML of a character sheet from the Armory."""
-        gp = GuildParser(downloader=self._downloader)
+        log.debug("Parsing character...")
         
         xml = minidom.parse(xml_file_object)
         character_nodes = xml.getElementsByTagName("character")
@@ -96,27 +107,37 @@ class CharacterParser(object):
         guild_rank = None
         guild_name = None
         
+        log.debug("Working on guild ranks...")
+        
+        # cflewis | 2009-04-02 | Check if character is in a guild at all
         if character_node.attributes["guildName"].value != "" or \
             character_node.attributes["guildName"].value is not None:
             
             try:
-                guild = gp.get_guild(character_node.attributes["guildName"].value, \
-                    realm, site, get_characters=False)
+                guild = self._gp.get_guild(character_node.attributes["guildName"].value, \
+                    realm, site, get_characters=False, cached=True)
             except Exception, e:
                 log.warning("Couldn't get guild " + name)
-                guild = None
-            
-            if guild is not None:
-                guild_rank = gp.get_guild_rank(guild.name, realm, site, name)
-                guild_name = guild.name
+            else:
+                try:
+                    guild_rank = self._gp.get_guild_rank(guild.name, realm, site, name)
+                except Exception, e:
+                    log.warning("Couldn't get guild rank")
+                else:
+                    guild_name = guild.name
         
-        # cflewis | 2009-03-28 | If the Armory fails out on us, this is the
-        # only data that isn't returned (on the main sheet, anyway)
-        # so we should check for it
+        # cflewis | 2009-04-02 | Last modified continues to be weird and
+        # I can't track this bug down!
         last_modified = None
+        
+        log.debug("Guilds done, working on last modified date...")
 
         try:
             last_modified_string = character_node.attributes["lastModified"].value
+        except KeyError, e:
+            log.warning("Couldn't get last modified date.")
+            last_modified = None
+        else:
             last_modified = datetime.datetime(*time.strptime(last_modified_string, "%B %d, %Y")[0:5])
             log.debug("Last modified date is " + str(last_modified))
             if last_modified.year < 2008:
@@ -127,11 +148,8 @@ class CharacterParser(object):
                 last_modified.replace(year=datetime.datetime.now().year)
             else:
                 log.debug("Last modified year is " + str(last_modified.year) + " so continuing")
-                
-        except KeyError, e:
-            # cflewis | 2009-03-28 | Armory must be down. Oh well.
-            log.warning("Couldn't get last modified date at all.")
-            last_modified = None
+        
+        log.debug("Character done...")
         
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified)
@@ -190,12 +208,27 @@ class Character(Base):
         return WoWSpyderLib.get_team_url(self.name, self.realm, self.site, \
                 self.size)
                 
+    def refresh(self):
+        cp = CharacterParser()
+        
+        try:
+            return_character = cp.get_character(self.name, self.realm, self.site, \
+                cached=False)
+        except Exception, e:
+            log.warning("Couldn't find character again")
+            
+        return return_character
+                
 class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
         
     def testCharacter(self):
         c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+        
+    def testRefresh(self):
+        c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+        c.refresh()
         
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
@@ -204,13 +237,21 @@ class GuildParser(Parser):
     """
     def __init__(self, downloader=None):
         '''Initialize the guild parser.'''
-        Parser.__init__(downloader=downloader)
+        Parser.__init__(self, downloader=downloader)
         Base.metadata.create_all(Database.engine)
         
     def _check_download(self, source, exception):
+        if exception:
+            log.error("Unable to download file for guild")
+            raise exception
+            
+        if re.search("guildInfo/", source):
+            log.error("Guild was invalid or not returned")
+            raise IOError("Guild requested was invalid or not returned")
+            
         return source
 
-    def get_guild(self, name, realm, site, get_characters=True, force_refresh=False):
+    def get_guild(self, name, realm, site, get_characters=False, cached=False):
         """Get a guild. Setting get_characters=False will disable the
         behavior that causes the guild characters to also be created. You
         may want to do this for speed increases.
@@ -219,32 +260,23 @@ class GuildParser(Parser):
         if name is None or name == "": 
             return None
 
-        guild = None
+        if cached:
+            return self._session.query(Guild).get((name, realm, site))
 
-        # cflewis | 2009-03-28 | Get characters is only false when we're
-        # worried about circular referencing from character creation, 
-        # so we don't need to be concerned with finding fresh characters
-        if (not self._prefs.refresh_all or get_characters is False) and force_refresh is False:
-            guild = self._session.query(Guild).get((name, realm, site))
-
-        if not guild:
-            log.debug("Didn't find guild, creating...")     
-            source = self._download_url(\
-                 WoWSpyderLib.get_guild_url(name, realm, site))
-            guild = self.__parse_guild(StringIO.StringIO(source), site, get_characters=get_characters)
+        # cflewis | 2009-04-02 | If the downloading fails, the whole guild
+        # couldn't be found, so the exception should propagate up.
+        source = self._download_url(\
+            WoWSpyderLib.get_guild_url(name, realm, site))
+        guild = self._parse_guild(StringIO.StringIO(source), site, get_characters=get_characters)
 
         return guild
         
 
-    def __parse_guild(self, xml_file_object, site, get_characters=True):
+    def _parse_guild(self, xml_file_object, site, get_characters=False):
         """Parse a guild page."""
         xml = minidom.parse(xml_file_object)
-        try:
-            guild_nodes = xml.getElementsByTagName("guildKey")
-            guild_node = guild_nodes[0]
-        except IndexError, e:
-            log.warning("Guild has been disbanded")
-            return None
+        guild_nodes = xml.getElementsByTagName("guildKey")
+        guild_node = guild_nodes[0]
 
         name = guild_node.attributes["name"].value
         realm = guild_node.attributes["realm"].value
@@ -256,7 +288,7 @@ class GuildParser(Parser):
         # cflewis | 2009-03-28 | Now need to put in guild's characters
         if get_characters:
             log.debug("Parsing guild character")
-            characters = self.__parse_guild_characters(name, realm, site)
+            characters = self._parse_guild_characters(name, realm, site)
             guild.characters = characters
         else:
             log.debug("Not parsing guild characters")
@@ -267,7 +299,7 @@ class GuildParser(Parser):
 
         return guild
 
-    def __parse_guild_characters(self, name, realm, site):
+    def _parse_guild_characters(self, name, realm, site):
         """Page through a guild, creating characters."""
         source = self._download_url( \
             WoWSpyderLib.get_guild_url(name, realm, site))
@@ -282,11 +314,11 @@ class GuildParser(Parser):
             source = self._download_url( \
                 WoWSpyderLib.get_guild_url(name, realm, site, page=page))
 
-            character_list.append(self.__parse_guild_file(StringIO.StringIO(source), site))
+            character_list.append(self._parse_guild_file(StringIO.StringIO(source), site))
 
         return WoWSpyderLib.merge(character_list)
 
-    def __parse_guild_file(self, xml_file_object, site):
+    def _parse_guild_file(self, xml_file_object, site):
         """Create characters from a single guild page."""
         xml = minidom.parse(xml_file_object)
         guild_nodes = xml.getElementsByTagName("guildKey")
@@ -303,10 +335,11 @@ class GuildParser(Parser):
             
             try:
                 character = cp.get_character(name, realm, site)
-                characters.append(character)
             except Exception, e:
                 log.warning("Couldn't get character " + name + ", continuing...")
                 continue
+            else:
+                characters.append(character)
             
         return characters
 
@@ -336,7 +369,7 @@ class GuildParser(Parser):
             if guild_rank_search:
                 return int(guild_rank_search.group(1))
 
-        return None
+        raise IOError("No character in that guild")
 
 
 class Guild(Base):
@@ -381,11 +414,12 @@ class Guild(Base):
 
         return WoWSpyderLib.get_guild_url(self.name, self.realm, self.site)
         
-    def refresh_characters(self):
+    def refresh(self, get_characters=False):
         gp = GuildParser()
         # cflewis | 2009-03-31 | Get guild could actually return None if this
         # guild was disbanded. I don't feel like dealing with this right now.
-        return_guild = gp.get_guild(self.name, self.realm, self.site, force_refresh=True)
+        return_guild = gp.get_guild(self.name, self.realm, self.site, \
+            get_characters=get_characters, cached=False)
         
         if return_guild is not None:
             return return_guild
@@ -410,11 +444,11 @@ class GuildParserTests(unittest.TestCase):
     #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
     #         get_characters=True)
             
-    def testForceRefresh(self):
+    def testRefresh(self):
         print "Getting guild without characters"
         guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
         print "Refreshing guild characters"
-        guild2 = guild1.refresh_characters()
+        guild2 = guild1.refresh()
         
         self.assertEqual(guild1, guild2)
         

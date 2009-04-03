@@ -45,6 +45,7 @@ To Do
 * Better documentation, both for users and docstrings for developers.
 * Handle all the character sheet things.
 * <strike>Work on preventing bad use of the script... is it possible to add related stuff lazily, so it doesn't cascade through? Perhaps this is achieved my moving the cascading calls (like Team->Character->Guild) to repeated calls via the actual object instead. team.get_guild which would do the DB check and downloading itself.</strike> This is really trying to prevent using the Arena access... downloading teams, characters is OK. Downloading guilds is iffy, so it has the get\_characters clause on it. I should just put that on the arena.
+* Replace caching to get_team, get_guild, get_character
 
 --
 [Chris Lewis](http://chris.to)

@@ -26,6 +26,7 @@ import threading
 import Queue
 
 log = Logger.log()
+cache = {}
 
 class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie
@@ -56,6 +57,11 @@ class XMLDownloader(object):
         downloading URLs on failure.
         
         """
+        if cache.has_key(url):
+            log.debug("Returning cached version of " + url)
+            return cache[url]
+        
+        log.debug("Downloading " + url)
         if backoffs_allowed is None: backoffs_allowed = self.backoff_attempts
         if backoff_time is None: backoff_time = self.backoff_initial_time
                 
@@ -66,7 +72,7 @@ http://github.com/Lewisham/wowspyder")
         request.add_header('Accept-encoding', 'gzip')
 
         try:
-            source = self.decompress_gzip(self._opener.open(request).read())
+            datastream = self._opener.open(request)
         except urllib2.HTTPError, error:
             warning = "Download URL failed, got HTTP %d. URL: %s" % (error.code, url)
             log.warning(warning)
@@ -92,11 +98,13 @@ http://github.com/Lewisham/wowspyder")
             return self.download_url(url, backoffs_allowed=backoffs_allowed, \
                 backoff_time=backoff_time)
         
+        source = self.decompress_gzip(datastream.read())
         self._opener.close()
-            
         log.debug("Downloaded %s" % url)
-                
-        return unicode(source, "utf-8").encode("utf-8")
+        unicode_source = unicode(source, "utf-8").encode("utf-8")
+        cache[url] = unicode_source
+        
+        return unicode_source
         
     def decompress_gzip(self, compressed_data):
         """Decompress gzipped data."""
@@ -116,7 +124,7 @@ class XMLDownloaderThreaded(object):
         self.request_queue = Queue.Queue()
     
         for x in xrange(number_of_threads):
-            thread = XMLDownloaderThread(self.request_queue, sleep_time = sleep_time)
+            thread = XMLDownloaderThread(self.request_queue, sleep_time=sleep_time)
             self.threads.append(thread)
             thread.start()
             
@@ -137,7 +145,7 @@ class XMLDownloaderThreaded(object):
 
 class XMLDownloaderThread(threading.Thread):
     """A thread to the XMLDownloader."""
-    def __init__(self, request_queue, sleep_time = 10):
+    def __init__(self, request_queue, sleep_time=2):
         threading.Thread.__init__(self)
         self.downloader = XMLDownloader()
         self.request_queue = request_queue

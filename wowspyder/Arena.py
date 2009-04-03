@@ -38,12 +38,13 @@ class ArenaParser(Parser):
     
     """
     def __init__(self, downloader=None):
+        log.debug("Creating arena with downloader " + str(downloader))
         Parser.__init__(self, downloader=downloader)
         self._tp = Team.TeamParser(downloader=self._downloader)
         
     def _check_download(self, source, exception):
         if exception:
-            log.error("Unable to download file for arena team")
+            log.error("Unable to download file for arena")
             raise exception
             
         if re.search("arenaLadderPagedResult.*?filterValue=\"\""):
@@ -86,12 +87,12 @@ class ArenaParser(Parser):
                     log.warning("Couldn't get arena page, continuing...")
                     continue
                 
-                teams = self.__parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
+                teams = self._parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
                 all_teams.append(teams)
                 
         return WoWSpyderLib.merge(all_teams)
             
-    def __parse_arena_file(self, xml_file_object, site, get_characters=False):
+    def _parse_arena_file(self, xml_file_object, site, get_characters=False):
         """Parse the XML of an arena page"""
         xml = minidom.parse(xml_file_object)
         team_nodes = xml.getElementsByTagName("arenaTeam")
@@ -104,9 +105,11 @@ class ArenaParser(Parser):
             
             try:
                 team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
-                teams.append(team)
             except Exception, e:
-                log.warning("Couldn't get team " + name)
+                log.warning("Couldn't get team " + name + ", continuing...")
+                continue
+            else:
+                teams.append(team)
             
         return teams
         
@@ -149,12 +152,9 @@ class ArenaParserTests(unittest.TestCase):
         print "Ended no character test at " + str(datetime.datetime.now())
         
     def testGetTeamsAndCharacters(self):
-        original_option = self.prefs.refresh_all
-        self.prefs.refresh_all = False
         print "Started character test at " + str(datetime.datetime.now())
         log.info("Started character test at " + str(datetime.datetime.now()))
         teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
-        self.prefs.refresh_all = original_option
         print "Ended character test at " + str(datetime.datetime.now())
         log.info("Ended character test at " + str(datetime.datetime.now()))
         

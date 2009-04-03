@@ -38,9 +38,9 @@ class BattlegroupParser(object):
         battlegroups = xml.getElementsByTagName("battlegroup")
         
         for bg_node in battlegroups:
-            self.__parse_battlegroup_node(bg_node)
+            self._parse_battlegroup_node(bg_node)
         
-    def __parse_battlegroup_node(self, bg_node):
+    def _parse_battlegroup_node(self, bg_node):
         name = bg_node.attributes["name"].value
         site = bg_node.attributes["site"].value
                 
@@ -51,9 +51,9 @@ class BattlegroupParser(object):
         realms = bg_node.getElementsByTagName("realm")
         
         for realm_node in realms:
-            self.__parse_realm_node(realm_node)
+            self._parse_realm_node(realm_node)
         
-    def __parse_realm_node(self, realm_node):
+    def _parse_realm_node(self, realm_node):
         name = realm_node.attributes["name"].value
         site = realm_node.attributes["site"].value
         battlegroup = realm_node.parentNode.attributes["name"].value
