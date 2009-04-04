@@ -33,25 +33,24 @@ if log.isEnabledFor(logging.DEBUG):
 
 engine = sa.create_engine(engine_url, echo=echo)
 
-Session = sa.orm.sessionmaker(bind=engine, autocommit=True)
-session = Session()
-
+Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True))
     
 def insert(obj):
-    """Insert an object into the database. Really, this just happens with
+    """Insert an object into the database. Actually this just happens with
     an SQLAlchemy merge, so WoWSpyder never has to worry about whether to
     insert or update.
     
     """
     return_obj = None
-    
+        
     try:
-        return_obj = session.merge(obj)
-    except sae.IntegrityError, e:
-        # cflewis | 2009-03-28 | Do nothing... merging shouldn't have
-        # caused an integrity error
-        log.warning("Integrity error " + str(e))
+        return_obj = session().merge(obj)
+    except Exception, e:
+        log.warning("Database problem: " + str(e))
         raise
+    
+def session():
+    return Session()
     
 def get_base():
     """Returns the SQLAlchemy Base object."""
@@ -62,6 +61,11 @@ def get_base():
 class DatabaseTests(unittest.TestCase):
 	def setUp(self):
 	    pass
+	    
+	def testSession(self):
+	    s1 = Session()
+	    s2 = Session()
+	    self.assertEquals(s1, s2)
 
 
 if __name__ == '__main__':

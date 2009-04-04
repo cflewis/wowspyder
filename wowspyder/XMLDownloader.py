@@ -30,7 +30,8 @@ log = Logger.log()
 
 cache_file = ".cache.db"
 cache_url = "sqlite:///" + cache_file
-cache = Shove(cache_url)
+#cache = Shove(cache_url)
+cache = {}
 
 class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie

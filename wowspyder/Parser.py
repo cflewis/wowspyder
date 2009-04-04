@@ -27,7 +27,7 @@ class Parser(object):
             self._downloader = XMLDownloader.XMLDownloaderThreaded( \
                 number_of_threads=number_of_threads, sleep_time=sleep_time)
 
-        self._session = Database.session
+        self._session = Database.session()
         Base.metadata.create_all(Database.engine)
         self._prefs = Preferences.Preferences()
         
