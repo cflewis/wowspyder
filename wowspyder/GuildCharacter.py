@@ -71,9 +71,10 @@ class CharacterParser(Parser):
         """Return a character object. This only stubs the guild, which means
         the guild won't be populated with characters."""
         log.debug("Getting character " + name + "...")
-        character = None
         
-        if cached:
+        character = self._session.query(Character).get((name, realm, site))
+        
+        if cached and character:
             return self._session.query(Character).get((name, realm, site))
         
         source = self._download_url(\
@@ -260,8 +261,10 @@ class GuildParser(Parser):
         if name is None or name == "": 
             return None
 
-        if cached:
-            return self._session.query(Guild).get((name, realm, site))
+        guild = self._session.query(Guild).get((name, realm, site))
+
+        if cached and guild:
+            return guild
 
         # cflewis | 2009-04-02 | If the downloading fails, the whole guild
         # couldn't be found, so the exception should propagate up.

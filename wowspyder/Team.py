@@ -64,7 +64,7 @@ class TeamParser(Parser):
         """
         team = self._session.query(Team).get((name, realm, site))
         
-        if cached:
+        if cached and team:
             return team
         
         if not team and not size: raise NameError("No team on that PK, " + \

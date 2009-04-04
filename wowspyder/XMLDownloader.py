@@ -24,9 +24,13 @@ import time
 import random
 import threading
 import Queue
+from shove import Shove
 
 log = Logger.log()
-cache = {}
+
+cache_file = ".cache.db"
+cache_url = "sqlite:///" + cache_file
+cache = Shove(cache_url)
 
 class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie
@@ -45,21 +49,35 @@ class XMLDownloader(object):
         
         self.refresh_login()
         
+    def __del__(self):
+        try:
+            os.remove(cache_file)
+        except OSError, e:
+            # cflewis | 2009-04-04 | This happens if XMLDownloader
+            # has been threaded, the first thread will delete the cache file.
+            # No need to worry.
+            pass
+        
     def refresh_login(self):
         """Refresh the login, getting a new session cookie from the Armory."""
         # cflewis | 2009-03-13 | Get the cookie saved.
-        self.download_url("http://www.wowarmory.com/login-status.xml")
+        self.download_url("http://www.wowarmory.com/login-status.xml", cached=False)
         log.debug("Got cookie " + str(self._cj))
         
-    def download_url(self, url, backoffs_allowed=None, backoff_time=None):
+    def download_url(self, url, backoffs_allowed=None, backoff_time=None, cached=True):
         """Download a URL and return the source. Specifying
         backoffs_allowed and backoff_time allows the downloader to retry
         downloading URLs on failure.
         
         """
-        if cache.has_key(url):
-            log.debug("Returning cached version of " + url)
-            return cache[url]
+        if cached:
+            try:
+                cached_source = cache[url]
+            except Exception, e:
+                log.debug("Retrieving " + url)
+            else:
+                log.debug("Returning cached version of " + url)
+                return cache[url]
         
         log.debug("Downloading " + url)
         if backoffs_allowed is None: backoffs_allowed = self.backoff_attempts

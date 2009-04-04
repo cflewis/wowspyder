@@ -47,7 +47,7 @@ class ArenaParser(Parser):
             log.error("Unable to download file for arena")
             raise exception
             
-        if re.search("arenaLadderPagedResult.*?filterValue=\"\""):
+        if re.search("arenaLadderPagedResult.*?filterValue=\"\"", source):
             log.error("Realm was invalid or not returned")
             raise IOError("Realm requested was invalid or not returned")
             
@@ -69,7 +69,7 @@ class ArenaParser(Parser):
                     ladder_number=ladder_number))
             except Exception, e:
                 log.warning("Couldn't get arena page for ladder " + 
-                    str(ladder_number) + ", continuing...")
+                    str(ladder_number) + ", continuing. ERROR: " + str(e))
                 continue
             
             max_pages = WoWSpyderLib.get_max_pages(source)
@@ -145,18 +145,10 @@ class ArenaParserTests(unittest.TestCase):
         # log.debug("Found %d guilds", len(guilds))
         
     def testGetTeamsNoCharacters(self):
-        print "Started no character test at " + str(datetime.datetime.now())
-        log.info("Started no character test at " + str(datetime.datetime.now()))
         teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=False)
-        log.info("Ended no character test at " + str(datetime.datetime.now()))
-        print "Ended no character test at " + str(datetime.datetime.now())
-        
+
     def testGetTeamsAndCharacters(self):
-        print "Started character test at " + str(datetime.datetime.now())
-        log.info("Started character test at " + str(datetime.datetime.now()))
         teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
-        print "Ended character test at " + str(datetime.datetime.now())
-        log.info("Ended character test at " + str(datetime.datetime.now()))
         
         
 

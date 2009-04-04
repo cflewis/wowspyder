@@ -14,3 +14,4 @@ svn/
 *.svn
 svn*
 .wowspyder.yaml
+.cache.db
