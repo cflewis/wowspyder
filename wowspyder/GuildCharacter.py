@@ -34,6 +34,7 @@ import StringIO
 import Preferences
 import re
 from Parser import Parser
+from Item import ItemParser
 
 log = Logger.log()
 
@@ -54,6 +55,7 @@ class CharacterParser(Parser):
         log.debug("Creating character parser with downloader " + str(downloader))
         Parser.__init__(self, downloader=downloader)
         self._gp = GuildParser(downloader=self._downloader)
+        self._ip = ItemParser(downloader=self._downloader)
         Base.metadata.create_all(Database.engine)
         
     def _check_download(self, source, exception):
@@ -150,10 +152,19 @@ class CharacterParser(Parser):
             else:
                 log.debug("Last modified year is " + str(last_modified.year) + " so continuing")
         
-        log.debug("Character done...")
+        log.debug("Character done, getting items...")
+        
+        items = [None] * 19
+        
+        item_nodes = xml.getElementsByTagName("item")
+        
+        for item_node in item_nodes:
+            item = self._ip.get_item(item_node.attributes["id"].value)
+            items[int(item_node.attributes["slot"].value)] = item.item_id
         
         character = Character(name, realm, site, level, character_class, faction, \
-            gender, race, guild_name, guild_rank, last_modified)
+            gender, race, guild_name, guild_rank, last_modified=last_modified, \
+            items=items)
         log.info("Creating character " + unicode(character).encode("utf-8"))
         Database.insert(character)
                 
@@ -177,16 +188,35 @@ class Character(Base):
             u"Blood Elf"])),
         Column("guild", Unicode(100), ForeignKey("GUILD.name")),
         Column("guild_rank", Integer()),
+        Column("item_slot_0", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_1", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_2", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_3", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_4", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_5", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_6", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_7", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_8", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_9", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_10", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_11", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_12", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_13", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_14", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_15", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_16", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_17", Integer(), ForeignKey("ITEM.item_id")),
+        Column("item_slot_18", Integer(), ForeignKey("ITEM.item_id")),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
-        Column("last_modified", DateTime(), default=datetime.datetime.now()),
-        Column("last_refresh", DateTime(), index=True),
+        Column("last_modified", DateTime()),
+        Column("last_refresh", DateTime(), default=datetime.datetime.now(), index=True),
         ForeignKeyConstraint(['realm', 'site'], ['REALM.name', 'REALM.site']),
         mysql_charset="utf8",
         mysql_engine="InnoDB"
     )
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
-            race, guild, guild_rank, last_modified=None, last_refresh=None):
+            race, guild, guild_rank, items=None, last_modified=None, last_refresh=None):
         self.name = name
         self.realm = realm
         self.site = site
@@ -198,11 +228,48 @@ class Character(Base):
         self.guild = guild
         self.guild_rank = guild_rank
         self.last_modified = last_modified
+        
+        if last_refresh:
+            if last_refresh.year < datetime.datetime.now().year:
+                log.warning("Last refresh year was broken, removing it to None.")
+                # cflewis | 2009-03-30 | The Armory has been returning strange
+                # years intermittently, not replicable when I manually visit
+                # the page. I'll set the year to what the current year is.
+                last_refresh = None
+                
         self.last_refresh = last_refresh
+        
+        if items:
+            self.explode_items(items)
         
     def __repr__(self):
         return unicode("<Character('%s','%s','%s','%s','%s')>" % (self.name, \
             self.realm, self.site, self.race, self.character_class))
+            
+    def explode_items(self, items):
+        if len(items) != 19:
+            raise Exception("Item list length is not 19")
+            
+        self.item_slot_0 = items[0]
+        self.item_slot_1 = items[1]
+        self.item_slot_2 = items[2]
+        self.item_slot_3 = items[3]
+        self.item_slot_4 = items[4]
+        self.item_slot_5 = items[5]
+        self.item_slot_6 = items[6]
+        self.item_slot_7 = items[7]
+        self.item_slot_8 = items[8]
+        self.item_slot_9 = items[9]
+        self.item_slot_10 = items[10]
+        self.item_slot_11 = items[11]
+        self.item_slot_12 = items[12]
+        self.item_slot_13 = items[13]
+        self.item_slot_14 = items[14]
+        self.item_slot_15 = items[15]
+        self.item_slot_16 = items[16]
+        self.item_slot_17 = items[17]
+        self.item_slot_18 = items[18]        
+        
     
     @property
     def url(self):

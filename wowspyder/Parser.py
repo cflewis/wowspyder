@@ -19,7 +19,7 @@ Base = Database.get_base()
 log = Logger.log()
 
 class Parser(object):
-    def __init__(self, number_of_threads=20, sleep_time=10, downloader=None):
+    def __init__(self, number_of_threads=20, sleep_time=2, downloader=None):
         self._downloader = downloader
 
         if self._downloader is None:
@@ -37,7 +37,7 @@ class Parser(object):
     def _refresh_downloader(self):
         log.debug("Refreshing downloader")
         self._downloader = XMLDownloader.XMLDownloaderThreaded( \
-            number_of_threads=20, sleep_time=10)
+            number_of_threads=20, sleep_time=2)
         
     def _download_url(self, url):
         log.debug("Parser downloading " + url)
@@ -47,7 +47,7 @@ class Parser(object):
         try:
             source = self._downloader.download_url(url)
         except Exception, e:
-            log.warning("Downloading returned an exception " + e)
+            log.warning("Parser downloading returned an exception " + e)
             error = e
             
         log.debug("Parser returning download source...")

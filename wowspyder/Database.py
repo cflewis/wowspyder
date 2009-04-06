@@ -33,7 +33,7 @@ if log.isEnabledFor(logging.DEBUG):
 
 engine = sa.create_engine(engine_url, echo=echo)
 
-Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True))
+Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=False))
     
 def insert(obj):
     """Insert an object into the database. Actually this just happens with
@@ -48,6 +48,14 @@ def insert(obj):
     except Exception, e:
         log.warning("Database problem: " + str(e))
         raise
+    else:
+        log.debug("Saved to database")
+        
+        # cflewis | 2009-04-06 | I've been unhappy with SQLA's detection
+        # of when to autocommit when it's placed into a scoped session.
+        # I have no idea what the problem is, but it is aggravating.
+        # It looks like i'll have to force commits myself.
+        session().commit()
     
 def session():
     return Session()

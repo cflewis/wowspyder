@@ -38,6 +38,15 @@ def get_team_url(name, realm, site, size):
     log.debug("Returning Team URL: " + team_url)
         
     return team_url
+    
+def get_item_url(item_id):
+    """Return the URL for an item"""
+    item_url = get_site_url(u"us") + "item-info.xml?" + \
+        "i=" + str(item_id)
+
+    log.debug("Returning Item URL: " + item_url)
+
+    return item_url
         
 def get_character_sheet_url(name, realm, site):
     """Return the URL for a character"""

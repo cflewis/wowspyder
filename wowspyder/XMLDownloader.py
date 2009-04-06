@@ -138,7 +138,7 @@ class XMLDownloaderThreaded(object):
     Calling close() when this object is no longer needed would be nice,
     but it closes threads when the object is destroyed.
     '''
-    def __init__(self, number_of_threads = 20, sleep_time = 10):
+    def __init__(self, number_of_threads=20, sleep_time=10):
         self.threads = []
         self.request_queue = Queue.Queue()
     
@@ -164,11 +164,13 @@ class XMLDownloaderThreaded(object):
 
 class XMLDownloaderThread(threading.Thread):
     """A thread to the XMLDownloader."""
-    def __init__(self, request_queue, sleep_time=2):
+    def __init__(self, request_queue, sleep_time=10):
         threading.Thread.__init__(self)
         self.downloader = XMLDownloader()
         self.request_queue = request_queue
         self.sleep_time = sleep_time
+        
+        log.debug("Sleep time is set to " + str(sleep_time))
         
     def run(self):        
         while 1:
