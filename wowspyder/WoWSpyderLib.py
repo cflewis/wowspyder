@@ -57,6 +57,15 @@ def get_character_sheet_url(name, realm, site):
     log.debug("Returning character sheet URL: " + character_sheet_url)
     return character_sheet_url
     
+def get_character_talents_url(name, realm, site):
+    """Return the talent URL for a character"""
+    character_talents_url = get_site_url(site) + "character-talents.xml?" + \
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&n=" + quote(name.encode("utf-8"))
+
+    log.debug("Returning character talents URL: " + character_talents_url)
+    return character_talents_url
+    
         
 def get_guild_url(name, realm, site, page=1):
     """Return the URL for a guild"""

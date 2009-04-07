@@ -162,13 +162,39 @@ class CharacterParser(Parser):
             item = self._ip.get_item(item_node.attributes["id"].value)
             items[int(item_node.attributes["slot"].value)] = item.item_id
         
+        talents = None
+        
+        try:    
+            talents = self._get_character_talents(name, realm, site)
+        except Exception, e:
+            log.warning("Couldn't get talents for " + name + " " + realm + \
+                " " + site + " because " + str(e))
+        
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified=last_modified, \
-            items=items)
+            items=items, talents=talents)
         log.info("Creating character " + unicode(character).encode("utf-8"))
         Database.insert(character)
                 
         return character
+        
+        
+    def _get_character_talents(self, name, realm, site):
+        source = self._download_url(\
+            WoWSpyderLib.get_character_talents_url(name, realm, site))
+        talents = self._parse_character_talents(StringIO.StringIO(source))
+            
+        return talents
+        
+    def _parse_character_talents(self, xml_file_object):
+        """Parse the XML of a talents character sheet from the Armory."""
+        log.debug("Parsing character talents...")
+        
+        xml = minidom.parse(xml_file_object)
+        talent_tree_nodes = xml.getElementsByTagName("talentTree")
+        talent_tree_node = talent_tree_nodes[0]
+        
+        return talent_tree_node.attributes["value"].value
 
 
 class Character(Base):
@@ -207,6 +233,7 @@ class Character(Base):
         Column("item_slot_16", Integer(), ForeignKey("ITEM.item_id")),
         Column("item_slot_17", Integer(), ForeignKey("ITEM.item_id")),
         Column("item_slot_18", Integer(), ForeignKey("ITEM.item_id")),
+        Column("talents", Unicode(100)),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
         Column("last_modified", DateTime()),
         Column("last_refresh", DateTime(), default=datetime.datetime.now(), index=True),
@@ -216,7 +243,8 @@ class Character(Base):
     )
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
-            race, guild, guild_rank, items=None, last_modified=None, last_refresh=None):
+            race, guild, guild_rank, items=None, talents=None, \
+            last_modified=None, last_refresh=None):
         self.name = name
         self.realm = realm
         self.site = site
@@ -228,6 +256,7 @@ class Character(Base):
         self.guild = guild
         self.guild_rank = guild_rank
         self.last_modified = last_modified
+        self.talents = talents
         
         if last_refresh:
             if last_refresh.year < datetime.datetime.now().year:
