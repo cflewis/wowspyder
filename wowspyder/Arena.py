@@ -53,7 +53,8 @@ class ArenaParser(Parser):
             
         return source
         
-    def get_arena_teams(self, battlegroup, realm, site, get_characters=False):
+    def get_arena_teams(self, battlegroup, realm, site, get_characters=False, \
+        ladders=[2,3,5], max_pages=None):
         '''Returns a list of arena teams as team objects. Setting get_characters
         to true will cause teams, their characters and their guilds to be
         downloaded. This cascading effect is very slow and should be used
@@ -62,7 +63,7 @@ class ArenaParser(Parser):
         '''
         all_teams = []
         
-        for ladder_number in [2, 3, 5]:
+        for ladder_number in ladders:
             try:
                 source = self._download_url( \
                     WoWSpyderLib.get_arena_url(battlegroup, realm, site, \
@@ -72,7 +73,7 @@ class ArenaParser(Parser):
                     str(ladder_number) + ", continuing. ERROR: " + str(e))
                 continue
             
-            max_pages = WoWSpyderLib.get_max_pages(source)
+            if not max_pages: max_pages = WoWSpyderLib.get_max_pages(source)
         
             for page in range(1, (max_pages + 1)):
                 log.debug(battlegroup + " " + realm + \
@@ -115,7 +116,7 @@ class ArenaParser(Parser):
         
 class ArenaParserTests(unittest.TestCase):
     def setUp(self):
-        self.us_realm = u"Ravenholdt"
+        self.us_realm = u"Blackwater Raiders"
         self.us_battlegroup = u"Whirlwind"
         self.eu_realm = u"Argent Dawn"
         self.eu_battlegroup = u"Bloodlust"
@@ -145,10 +146,12 @@ class ArenaParserTests(unittest.TestCase):
         # log.debug("Found %d guilds", len(guilds))
         
     def testGetTeamsNoCharacters(self):
-        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=False)
+        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, \
+            u"us", get_characters=False, ladders=[2], max_pages=1)
 
     def testGetTeamsAndCharacters(self):
-        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, u"us", get_characters=True)
+        teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, \
+            u"us", get_characters=True, ladders=[2], max_pages=1)
         
         
 
