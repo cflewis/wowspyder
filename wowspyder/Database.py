@@ -44,19 +44,24 @@ def insert(obj):
     return_obj = None
         
     try:
-        return_obj = session().merge(obj)
+        return_obj = session().add(obj)
+        session.commit()
     except Exception, e:
-        log.warning("Database problem: " + str(e))
-        session().rollback()
-        raise
+        try:
+            return_obj = session().merge(obj)
+        except Exception, e:
+            log.warning("Database problem: " + str(e))
+            session().rollback()
+            raise
+        else:
+            log.debug("Merged with database: " + str(obj))
+            try:
+                session().commit()
+            except Exception, e:
+                log.warning("Database problem: " + str(e))
+                session().rollback()
     else:
-        log.debug("Saved to database")
-        
-        # cflewis | 2009-04-06 | I've been unhappy with SQLA's detection
-        # of when to autocommit when it's placed into a scoped session.
-        # I have no idea what the problem is, but it is aggravating.
-        # It looks like i'll have to force commits myself.
-        session().commit()
+        log.debug("Inserted to database: " + str(obj))
     
 def session():
     return Session()
