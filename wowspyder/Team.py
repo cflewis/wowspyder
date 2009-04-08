@@ -94,6 +94,7 @@ class TeamParser(Parser):
         
         team = Team(name, realm, site, size, faction)
         log.info("Creating team " + unicode(team).encode("utf-8"))
+        Database.insert(team)
         
         if get_characters:
             characters = self._parse_team_characters(StringIO.StringIO(xml_file_object.getvalue()), site)
@@ -126,7 +127,7 @@ class TeamParser(Parser):
                 # No idea what to do.
                 character = self._cp.get_character(name, realm, site)
             except Exception, e:
-                log.warning("Couldn't get character " + name + ", continuing...")
+                log.warning("Couldn't get character " + name + ", continuing. ERROR: " + str(e))
                 continue
             else:
                 characters.append(character)
@@ -152,7 +153,7 @@ class Team(Base):
         Column("realm", Unicode(100), primary_key=True),
         Column("site", Unicode(2), primary_key=True),
         Column("size", Integer()),
-        Column("faction", Enum([u"Alliance", u"Horde"])),
+        Column("faction", Unicode(8)), #Enum([u"Alliance", u"Horde"])),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
         Column("last_refresh", DateTime(), index=True),
         ForeignKeyConstraint(['realm', 'site'], ['REALM.name', 'REALM.site']),
@@ -164,6 +165,7 @@ class Team(Base):
     characters = relation(Character, secondary=team_characters, backref=backref("teams"))
     
     def __init__(self, name, realm, site, size, faction, last_refresh=None):
+        log.debug("%s, %s, %s, %s" % (name, realm, site, str(size)))
         self.name = name
         self.realm = realm
         self.site = site
@@ -206,20 +208,21 @@ class Team(Base):
 class TeamParserTests(unittest.TestCase):
     def setUp(self):
         self.tp = TeamParser()
+    
+    # def testCharacterTeam(self):
+    #     team = self.tp.get_team(u"JUST DIED IN ONE HIT", u"Mug'Thol", 
+    #         u"us", 2, get_characters=False)
+    #         
+    def testNoCharacterTeam(self):
+        team = self.tp.get_team(u"JUST DIED IN ONE HIT", u"Mug'Thol", 
+            u"us", 2, get_characters=True)
+    
+    # def testRelation(self):
+    #     log.debug("Realm: " + str(self.test_team.realm_object))
+    #     characters = self.test_team.characters
+    #     log.debug("Characters: " + str(self.test_team.characters))
+    #     self.assertTrue(characters)
         
-    # cflewis | 2009-04-02 | Something is wrong with get_characters
-        self.test_team = self.tp.get_team(u"Afflicted", u"Ravenholdt", 
-            u"us", 5, get_characters=True)
-            
-    def testRelation(self):
-        log.debug("Realm: " + str(self.test_team.realm_object))
-        characters = self.test_team.characters
-        log.debug("Characters: " + str(self.test_team.characters))
-        self.assertTrue(characters)
-        
-    def testRepitition(self):
-        test_team2 = self.tp.get_team(u"Afflicted", u"Ravenholdt", 
-            u"us", 5)
         
     # def testPrimaryKey(self):
     #     self.assertTrue(self.tp.get_team(u"Party Like Rockstars", u"Cenarius", u"us"))

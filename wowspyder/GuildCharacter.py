@@ -120,12 +120,12 @@ class CharacterParser(Parser):
                 guild = self._gp.get_guild(character_node.attributes["guildName"].value, \
                     realm, site, get_characters=False, cached=True)
             except Exception, e:
-                log.warning("Couldn't get guild " + name)
+                log.warning("Couldn't get guild " + name + ". ERROR: " + str(e))
             else:
                 try:
                     guild_rank = self._gp.get_guild_rank(guild.name, realm, site, name)
                 except Exception, e:
-                    log.warning("Couldn't get guild rank")
+                    log.warning("Couldn't get guild rank. ERROR: " + str(e))
                 else:
                     guild_name = guild.name
         
@@ -138,7 +138,7 @@ class CharacterParser(Parser):
         try:
             last_modified_string = character_node.attributes["lastModified"].value
         except KeyError, e:
-            log.warning("Couldn't get last modified date.")
+            log.warning("Couldn't get last modified date. ERROR: " + str(e))
             last_modified = None
         else:
             last_modified = datetime.datetime(*time.strptime(last_modified_string, "%B %d, %Y")[0:5])
@@ -168,7 +168,7 @@ class CharacterParser(Parser):
             talents = self._get_character_talents(name, realm, site)
         except Exception, e:
             log.warning("Couldn't get talents for " + name + " " + realm + \
-                " " + site + " because " + str(e))
+                " " + site + ". ERROR: " + str(e))
         
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified=last_modified, \
@@ -182,7 +182,7 @@ class CharacterParser(Parser):
             statistics = self._get_character_statistics(name, realm, site)
         except Exception, e:
             log.warning("Couldn't get statistics for " + name + " " + realm + \
-                " " + site + " because " + str(e))
+                " " + site + ". ERROR: " + str(e))
         
         for statistic in statistics:
             character.statistics.append(statistic)
@@ -224,7 +224,6 @@ class CharacterParser(Parser):
         """Parse the XML of a statistics character sheet from the Armory."""
         log.debug("Parsing character statistics...")
         xml = minidom.parse(xml_file_object)
-        log.debug(xml.toxml())
         statistics = []
         statistic_nodes = xml.getElementsByTagName("statistic")
 
@@ -407,15 +406,21 @@ class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
         
-    def testCharacter(self):
-        c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-        
-    def testRefresh(self):
-        c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-        c.refresh()
-        
-    def testStatistics(self):
-        stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
+    # def testCharacter(self):
+    #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+    #     
+    # def testRefresh(self):
+    #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+    #     c.refresh()
+    #     
+    # def testStatistics(self):
+    #     stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
+    #     
+    def testOddGuy1(self):
+        c = self.cp.get_character(u"Roflnewguy", u"Mug'thol", u"us")
+    
+    def testOddGuy2(self):
+        c = self.cp.get_character(u"Varilyn", u"Mug'thol", u"us")
         
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
@@ -525,7 +530,7 @@ class GuildParser(Parser):
             try:
                 character = cp.get_character(name, realm, site)
             except Exception, e:
-                log.warning("Couldn't get character " + name + ", continuing...")
+                log.warning("Couldn't get character " + name + ", continuing. ERROR: " + str(e))
                 continue
             else:
                 characters.append(character)

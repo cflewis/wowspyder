@@ -85,7 +85,7 @@ class ArenaParser(Parser):
                         WoWSpyderLib.get_arena_url(battlegroup, realm, site, page=page, \
                             ladder_number=ladder_number))
                 except Exception, e:
-                    log.warning("Couldn't get arena page, continuing...")
+                    log.warning("Couldn't get arena page, continuing... ERROR: " + str(e))
                     continue
                 
                 teams = self._parse_arena_file(StringIO.StringIO(source), site, get_characters=get_characters)
@@ -107,7 +107,7 @@ class ArenaParser(Parser):
             try:
                 team = self._tp.get_team(name, realm, site, size, get_characters=get_characters)
             except Exception, e:
-                log.warning("Couldn't get team " + name + ", continuing...")
+                log.warning("Couldn't get team " + name + " continuing. ERROR: " + str(e))
                 continue
             else:
                 teams.append(team)

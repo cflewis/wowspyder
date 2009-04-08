@@ -47,6 +47,7 @@ def insert(obj):
         return_obj = session().merge(obj)
     except Exception, e:
         log.warning("Database problem: " + str(e))
+        session().rollback()
         raise
     else:
         log.debug("Saved to database")

@@ -33,7 +33,7 @@ def get_team_url(name, realm, site, size):
     team_url = get_site_url(site) + "team-info.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&ts=" + str(size) + \
-        "&t=" + quote(name.encode("utf-8"))
+        "&t=" + re.sub("%20", "+", quote(name)).encode("utf-8")
 
     log.debug("Returning Team URL: " + team_url)
         
