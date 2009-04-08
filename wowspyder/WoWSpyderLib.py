@@ -71,14 +71,29 @@ def get_guild_url(name, realm, site, page=1):
     """Return the URL for a guild"""
     log.debug("Returning guild URL")
     return get_site_url(site) + "guild-info.xml?" + \
-    "r=" + quote(realm.encode("utf-8")) + \
-    "&n=" + quote(name.encode("utf-8")) + \
-    "&p=" + str(page)
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&n=" + quote(name.encode("utf-8")) + \
+        "&p=" + str(page)
     
 def get_max_pages(source):
     """Return the max pages for pages that paginate."""
     return int(re.search("maxPage=\"(\d*)\"", source).group(1))
-
+    
+def get_character_statistics_urls(name, realm, site):
+    urls = []
+    
+    for category in [130,141,128,122,133,14807,132,134,131,21]:
+        urls.append(_get_character_statistic_base_url(name, realm, site) + \
+            "&c=" + str(category))
+            
+    return urls
+    
+def _get_character_statistic_base_url(name, realm, site):
+    """Return the base URL for character statistics"""
+    return get_site_url(site) + "character-statistics.xml?" + \
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&n=" + quote(name.encode("utf-8"))
+    
 def merge(seq):
     """Merge a list of lists into one big list."""
     merged = []

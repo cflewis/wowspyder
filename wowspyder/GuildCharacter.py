@@ -175,6 +175,19 @@ class CharacterParser(Parser):
             items=items, talents=talents)
         log.info("Creating character " + unicode(character).encode("utf-8"))
         Database.insert(character)
+        
+        statistics = []
+        
+        try:
+            statistics = self._get_character_statistics(name, realm, site)
+        except Exception, e:
+            log.warning("Couldn't get statistics for " + name + " " + realm + \
+                " " + site + " because " + str(e))
+        
+        for statistic in statistics:
+            character.statistics.append(statistic)
+                
+        Database.insert(character)
                 
         return character
         
@@ -195,6 +208,77 @@ class CharacterParser(Parser):
         talent_tree_node = talent_tree_nodes[0]
         
         return talent_tree_node.attributes["value"].value
+        
+    def _get_character_statistics(self, name, realm, site):
+        urls = WoWSpyderLib.get_character_statistics_urls(name, realm, site)
+        statistics = []
+        
+        for url in urls:
+            source = self._download_url(url)
+            statistics.append(self._parse_character_statistics(StringIO.StringIO(source), name, realm, site))
+            
+        return WoWSpyderLib.merge(statistics)
+            
+            
+    def _parse_character_statistics(self, xml_file_object, name, realm, site):
+        """Parse the XML of a statistics character sheet from the Armory."""
+        log.debug("Parsing character statistics...")
+        xml = minidom.parse(xml_file_object)
+        log.debug(xml.toxml())
+        statistics = []
+        statistic_nodes = xml.getElementsByTagName("statistic")
+
+        for statistic_node in statistic_nodes:
+            try:
+                statistic = statistic_node.attributes["name"].value
+            except KeyError, e:
+                # cflewis | 2009-04-07 | This wasn't a statistic node at all
+                # or a blank one, like <statistic/>
+                continue
+                
+            quantity = statistic_node.attributes["quantity"].value
+            
+            if quantity == "--": quantity = None
+            
+            highest = None
+            
+            try:
+                highest = statistic_node.attributes["highest"].value
+            except KeyError, e:
+                pass
+            
+            statistic = CharacterStatistic(name, realm, site, \
+                statistic, quantity, highest)
+            #Database.insert(statistic)
+            statistics.append(statistic)
+                
+        return statistics
+
+class CharacterStatistic(Base):
+    """A statistic on a character."""
+    __table__ = Table("CHARACTER_STATISTIC", Base.metadata,
+        Column("name", Unicode(100), primary_key=True),
+        Column("realm", Unicode(100), primary_key=True),
+        Column("site", Unicode(2), primary_key=True),
+        Column("statistic", Unicode(100), primary_key=True),
+        Column("quantity", Unicode(100)),
+        Column("highest", Unicode(100)),
+        ForeignKeyConstraint(['name','realm', 'site'], ['CHARACTER.name', 'CHARACTER.realm', 'CHARACTER.site']),
+        mysql_charset="utf8",
+        mysql_engine="InnoDB"
+    )
+
+    def __init__(self, name, realm, site, statistic, quantity, highest):
+        self.name = name
+        self.realm = realm
+        self.site = site
+        self.statistic = statistic
+        self.quantity = quantity
+        self.highest = highest
+
+    def __repr__(self):
+        return unicode("<CharacterStatistic('%s','%s','%s','%s','%s')>" % (self.name, \
+            self.realm, self.site, self.statistic, self.value))
 
 
 class Character(Base):
@@ -241,6 +325,8 @@ class Character(Base):
         mysql_charset="utf8",
         mysql_engine="InnoDB"
     )
+    
+    statistics = relation(CharacterStatistic, backref="character")
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
             race, guild, guild_rank, items=None, talents=None, \
@@ -314,8 +400,9 @@ class Character(Base):
         except Exception, e:
             log.warning("Couldn't find character again")
             
-        return return_character
-                
+        return return_character           
+
+
 class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
@@ -326,6 +413,9 @@ class CharacterParserTests(unittest.TestCase):
     def testRefresh(self):
         c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
         c.refresh()
+        
+    def testStatistics(self):
+        stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
         
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
@@ -526,30 +616,30 @@ class Guild(Base):
         return self
         
 
-class GuildParserTests(unittest.TestCase):
-    def setUp(self):
-        self.gp = GuildParser()
-
-    # def testGuildRank(self):
-    #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
-    # 
-    # def testGuildRank2(self):
-    #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
-    # 
-    # def testInsertGuildNoCharacters(self):
-    #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
-    # 
-    # def testInsertGuildCharacters(self):
-    #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-    #         get_characters=True)
-            
-    def testRefresh(self):
-        print "Getting guild without characters"
-        guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
-        print "Refreshing guild characters"
-        guild2 = guild1.refresh()
-        
-        self.assertEqual(guild1, guild2)
+# class GuildParserTests(unittest.TestCase):
+#     def setUp(self):
+#         self.gp = GuildParser()
+# 
+#     # def testGuildRank(self):
+#     #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
+#     # 
+#     # def testGuildRank2(self):
+#     #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
+#     # 
+#     # def testInsertGuildNoCharacters(self):
+#     #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
+#     # 
+#     # def testInsertGuildCharacters(self):
+#     #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+#     #         get_characters=True)
+#             
+#     def testRefresh(self):
+#         print "Getting guild without characters"
+#         guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
+#         print "Refreshing guild characters"
+#         guild2 = guild1.refresh()
+#         
+#         self.assertEqual(guild1, guild2)
         
 if __name__ == '__main__':
     unittest.main()
