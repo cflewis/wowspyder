@@ -101,10 +101,22 @@ class TeamParser(Parser):
         
             # cflewis | 2009-03-28 | Add the characters to the team
             for character in characters:
+                # cflewis | 2009-04-08 | This memory leaks
                 team.characters.append(character)
-        
+                log.debug("Adding " + character.name + " to team " + name)
+                # cflewis | 2009-04-08 | Can't seem to get this to work
+                # for unicode. Arghh!
+                #Database.engine.execute(team_characters.insert(), \
+                #    realm=unicode(realm), \
+                #    site=site, team_name=unicode(name), \
+                #    character_name=unicode(character.name))
+                        
         # cflewis | 2009-03-28 | Merge to update the characters added
         Database.insert(team)
+        # cflewis | 2009-04-08 | Doing this prevents leaks BUT ONLY
+        # IF TEAM IS NOT REINSERTED INTO THE DATABASE!
+        team.characters = []
+        #Database.insert(team)
 
         return team
         
@@ -143,7 +155,10 @@ team_characters = Table("TEAM_CHARACTERS", Base.metadata,
     ForeignKeyConstraint(['team_name','realm', 'site'], ['TEAM.name', \
         'TEAM.realm', 'TEAM.site']),
     ForeignKeyConstraint(['character_name','realm', 'site'], ['CHARACTER.name', \
-        'CHARACTER.realm', 'CHARACTER.site']))
+        'CHARACTER.realm', 'CHARACTER.site']),
+        mysql_charset="utf8",
+        mysql_engine="InnoDB"
+)
 
 
 class Team(Base):
@@ -153,7 +168,7 @@ class Team(Base):
         Column("realm", Unicode(100), primary_key=True),
         Column("site", Unicode(2), primary_key=True),
         Column("size", Integer()),
-        Column("faction", Unicode(8)), #Enum([u"Alliance", u"Horde"])),
+        Column("faction", Enum([u"Alliance", u"Horde"])),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
         Column("last_refresh", DateTime(), index=True),
         ForeignKeyConstraint(['realm', 'site'], ['REALM.name', 'REALM.site']),

@@ -14,27 +14,23 @@ import sqlalchemy as sa
 import Preferences
 import Logger
 import logging
+import gc
 
 from sqlalchemy.ext.declarative import declarative_base
 import sqlalchemy.exceptions as sae
 
 Base = declarative_base()
-
 prefs = Preferences.Preferences()
-
 log = Logger.log()
-
 engine_url = prefs.database_url
-
 echo = False
 
 if log.isEnabledFor(logging.DEBUG):
     echo = True
 
 engine = sa.create_engine(engine_url, echo=echo)
+Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True))
 
-Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=False))
-    
 def insert(obj):
     """Insert an object into the database. Actually this just happens with
     an SQLAlchemy merge, so WoWSpyder never has to worry about whether to
@@ -43,28 +39,28 @@ def insert(obj):
     """
     return_obj = None
         
-    try:
-        return_obj = session().merge(obj)
-    except Exception, e:
-        log.warning("Database problem: " + str(e))
-        session().rollback()
-        raise
-    else:
-        log.debug("Saved to database")
-        
-        # cflewis | 2009-04-06 | I've been unhappy with SQLA's detection
-        # of when to autocommit when it's placed into a scoped session.
-        # I have no idea what the problem is, but it is aggravating.
-        # It looks like i'll have to force commits myself.
-        session().commit()
-    
+    # try:
+    return_obj = session().merge(obj)
+    # except Exception, e:
+    #     log.warning("Database problem: " + str(e))
+    #     session().rollback()
+    #     raise
+    # else:
+    #     log.debug("Saved to database")
+    #     
+    #     # cflewis | 2009-04-06 | I've been unhappy with SQLA's detection
+    #     # of when to autocommit when it's placed into a scoped session.
+    #     # I have no idea what the problem is, but it is aggravating.
+    #     # It looks like i'll have to force commits myself.
+    #     session().commit()
+    #     session().expunge_all()
+            
 def session():
     return Session()
     
 def get_base():
     """Returns the SQLAlchemy Base object."""
     return Base
-
 
 
 class DatabaseTests(unittest.TestCase):

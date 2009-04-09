@@ -188,6 +188,10 @@ class CharacterParser(Parser):
             character.statistics.append(statistic)
                 
         Database.insert(character)
+        
+        from guppy import hpy
+        h = hpy()
+        print h.heap()
                 
         return character
         
@@ -483,7 +487,7 @@ class GuildParser(Parser):
         if get_characters:
             log.debug("Parsing guild character")
             characters = self._parse_guild_characters(name, realm, site)
-            guild.characters = characters
+            #guild.characters = characters
         else:
             log.debug("Not parsing guild characters")
 

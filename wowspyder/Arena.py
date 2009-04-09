@@ -150,9 +150,13 @@ class ArenaParserTests(unittest.TestCase):
             u"us", get_characters=False, ladders=[2], max_pages=1)
 
     def testGetTeamsAndCharacters(self):
+        from guppy import hpy
+        h = hpy()
+        print h.heap()
         teams = self.ap.get_arena_teams(self.us_battlegroup, self.us_realm, \
             u"us", get_characters=True, ladders=[2], max_pages=1)
-        
+        h = hpy()
+        print h.heap()
         
 
 if __name__ == '__main__':

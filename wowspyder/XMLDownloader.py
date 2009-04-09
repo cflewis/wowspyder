@@ -25,13 +25,25 @@ import random
 import threading
 import Queue
 from shove import Shove
+import signal
+import gc
 
 log = Logger.log()
 
-cache_file = ".cache.db"
-cache_url = "sqlite:///" + cache_file
-#cache = Shove(cache_url)
-cache = {}
+# cflewis | 2009-04-08 | I think storing this in memory is causing
+# memory exhaustion, which is what could be contributing to scaling issues.
+cache = Shove()
+
+def refresh_cache(signum, frame):
+    cache.clear()
+    gc.collect()
+    log.debug("Refreshed cache")
+    signal.signal(signal.SIGALRM, refresh_cache)
+    signal.alarm(300)
+
+log.debug("Setting alarm")
+signal.signal(signal.SIGALRM, refresh_cache)
+signal.alarm(300)
 
 class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie
@@ -51,13 +63,14 @@ class XMLDownloader(object):
         self.refresh_login()
         
     def __del__(self):
-        try:
-            os.remove(cache_file)
-        except OSError, e:
-            # cflewis | 2009-04-04 | This happens if XMLDownloader
-            # has been threaded, the first thread will delete the cache file.
-            # No need to worry.
-            pass
+        pass
+        # try:
+        #     os.remove(cache_file)
+        # except OSError, e:
+        #     # cflewis | 2009-04-04 | This happens if XMLDownloader
+        #     # has been threaded, the first thread will delete the cache file.
+        #     # No need to worry.
+        #     pass
         
     def refresh_login(self):
         """Refresh the login, getting a new session cookie from the Armory."""
@@ -78,7 +91,9 @@ class XMLDownloader(object):
                 log.debug("Retrieving " + url)
             else:
                 log.debug("Returning cached version of " + url)
-                return cache[url]
+                source = self.decompress_gzip(cached_source)
+                unicode_source = unicode(source, "utf-8").encode("utf-8")
+                return unicode_source
         
         log.debug("Downloading " + url)
         if backoffs_allowed is None: backoffs_allowed = self.backoff_attempts
@@ -117,11 +132,12 @@ http://github.com/Lewisham/wowspyder")
             return self.download_url(url, backoffs_allowed=backoffs_allowed, \
                 backoff_time=backoff_time)
         
-        source = self.decompress_gzip(datastream.read())
+        gzipped_source = datastream.read()
+        source = self.decompress_gzip(gzipped_source)
         self._opener.close()
         log.debug("Downloaded %s" % url)
         unicode_source = unicode(source, "utf-8").encode("utf-8")
-        cache[url] = unicode_source
+        if cached: cache[url] = gzipped_source
         
         return unicode_source
         
@@ -231,6 +247,12 @@ class XMLDownloaderTests(unittest.TestCase):
         self.dt = XMLDownloaderThreaded()
         source = self.dt.download_url(self.moulin)
         self.assertTrue(source)
+        
+    def testCacheRefresh(self):
+        log.debug("TESTING cache refresh, watch...")
+        source = self.downloader.download_url(self.moulin)
+        refresh_cache(None, None)
+        source = self.downloader.download_url(self.moulin)
 
         
 if __name__ == '__main__':
