@@ -188,10 +188,6 @@ class CharacterParser(Parser):
             character.statistics.append(statistic)
                 
         Database.insert(character)
-        
-        from guppy import hpy
-        h = hpy()
-        print h.heap()
                 
         return character
         
@@ -241,7 +237,7 @@ class CharacterParser(Parser):
                 
             quantity = statistic_node.attributes["quantity"].value
             
-            if quantity == "--": quantity = None
+            if quantity == "--": quantity = 0
             
             highest = None
             
@@ -252,7 +248,7 @@ class CharacterParser(Parser):
             
             statistic = CharacterStatistic(name, realm, site, \
                 statistic, quantity, highest)
-            #Database.insert(statistic)
+            Database.insert(statistic)
             statistics.append(statistic)
                 
         return statistics
