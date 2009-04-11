@@ -12,6 +12,8 @@ import os
 import Logger
 from urllib2 import quote
 import re
+import datetime
+import time
 log = Logger.log()
 
 def get_site_url(site):
@@ -93,6 +95,10 @@ def _get_character_statistic_base_url(name, realm, site):
     return get_site_url(site) + "character-statistics.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&n=" + quote(name.encode("utf-8"))
+        
+def convert_last_modified_to_datetime(date_string):
+    log.debug("Date string is " + str(date_string))
+    return datetime.datetime(*time.strptime(date_string, "%B %d, %Y")[0:5])
     
 def merge(seq):
     """Merge a list of lists into one big list."""

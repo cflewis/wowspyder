@@ -76,8 +76,10 @@ class CharacterParser(Parser):
         
         character = self._session.query(Character).get((name, realm, site))
         
-        if cached and character:
-            return self._session.query(Character).get((name, realm, site))
+        # cflewis | 2009-04-11 | Check if a character is actually updated
+        # on the armory. If not, return the database version anyway.
+        if character and (cached == True or character.is_updated_on_armory() == False):
+            return character            
         
         source = self._download_url(\
             WoWSpyderLib.get_character_sheet_url(name, realm, site))
@@ -141,7 +143,7 @@ class CharacterParser(Parser):
             log.warning("Couldn't get last modified date. ERROR: " + str(e))
             last_modified = None
         else:
-            last_modified = datetime.datetime(*time.strptime(last_modified_string, "%B %d, %Y")[0:5])
+            last_modified = WoWSpyderLib.convert_last_modified_to_datetime(last_modified_string)
             log.debug("Last modified date is " + str(last_modified))
             if last_modified.year < 2008:
                 log.warning("Last modified year was broken, fixing it to this year")
@@ -329,7 +331,7 @@ class Character(Base):
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
             race, guild, guild_rank, items=None, talents=None, \
-            last_modified=None, last_refresh=None):
+            last_modified=None, last_refresh=None):            
         self.name = name
         self.realm = realm
         self.site = site
@@ -387,8 +389,7 @@ class Character(Base):
     
     @property
     def url(self):
-        return WoWSpyderLib.get_team_url(self.name, self.realm, self.site, \
-                self.size)
+        return WoWSpyderLib.get_character_sheet_url(self.name, self.realm, self.site)
                 
     def refresh(self):
         cp = CharacterParser()
@@ -399,29 +400,47 @@ class Character(Base):
         except Exception, e:
             log.warning("Couldn't find character again")
             
-        return return_character           
+        return return_character
+        
+    @property
+    def last_modified_on_armory(self):    
+        # cflewis | 2009-04-11 | It's safe to cache because there's no way
+        # the lifetime of a character object will exceed that of an armory
+        # refresh.
+        downloader = XMLDownloader.XMLDownloader()
+        source = downloader.download_url(self.url)
+        
+        if has_attr(self, "_last_modified_on_armory"):
+            if self._last_modified_on_armory != None:
+                return self._last_modified_on_armory
+        
+        try:
+            armory_date_string = re.search("lastModified=\"(.*?)\"", source).group(1)
+        except Exception, e:
+            log.debug("Couldn't find last modified, returning what I had")
+            return self.last_modified
+        else:
+            self._last_modified_on_armory = \
+                WoWSpyderLib.convert_last_modified_to_datetime(armory_date_string)
+            log.debug("Saved last modified on armory as " + str(self._last_modified_on_armory))
+            return self._last_modified_on_armory
+        
+    def is_updated_on_armory(self):
+        if self.last_modified_on_armory > self.last_modified:
+            log.debug("Character has been updated on the armory")
+            return True
+            
+        log.debug("Character is not updated on the armory")
+        return False
 
-
-# class CharacterParserTests(unittest.TestCase):
-#     # def setUp(self):
-#     #     self.cp = CharacterParser()
-#     #     
-#     # # def testCharacter(self):
-#     # #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-#     # #     
-#     # # def testRefresh(self):
-#     # #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-#     # #     c.refresh()
-#     # #     
-#     # # def testStatistics(self):
-#     # #     stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
-#     # #     
-#     # def testOddGuy1(self):
-#     #     c = self.cp.get_character(u"Roflnewguy", u"Mug'thol", u"us")
-#     # 
-#     # def testOddGuy2(self):
-#     #     c = self.cp.get_character(u"Varilyn", u"Mug'thol", u"us")
-#     #     
+class CharacterParserTests(unittest.TestCase):
+    def setUp(self):
+        self.cp = CharacterParser()
+        self.c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+    def testCharacterModifiedDate(self):
+        self.assertFalse(self.c.is_updated_on_armory())
+    
+        
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
     also fill out the characters within it.
@@ -637,17 +656,16 @@ class GuildParserTests(unittest.TestCase):
     def testGuildRankUnicode(self):
         try:
             result = self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare")
-            print result
         except Exception, e:
             print "Exception got " + str(e)
-        #self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
+        self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
     
     # def testInsertGuildNoCharacters(self):
     #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
     # 
-    def testInsertGuildCharacters(self):
-        self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-            get_characters=True)
+    # def testInsertGuildCharacters(self):
+    #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+    #         get_characters=True)
             
     # def testRefresh(self):
     #     print "Getting guild without characters"
