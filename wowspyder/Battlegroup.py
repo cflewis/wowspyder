@@ -15,7 +15,7 @@ import Database
 import Logger
 import datetime
 from sqlalchemy import Table, Column, ForeignKey, ForeignKeyConstraint, \
-    Unicode, DateTime
+    Unicode, DateTime, String
 from sqlalchemy.ext.declarative import declarative_base
 
 log = Logger.log()
@@ -98,6 +98,8 @@ class Realm(Base):
         Column("server_type", Unicode(6)),
         Column("language", Unicode(2)),
         Column("last_refresh", DateTime(), index=True),
+        Column("lock_id", String(100), index=True),
+        Column("lock_time", DateTime()),
         ForeignKeyConstraint(['battlegroup', 'site'], ['BATTLEGROUP.name', 'BATTLEGROUP.site']),
         mysql_charset="utf8",
         mysql_engine="InnoDB"
