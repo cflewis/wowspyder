@@ -29,7 +29,7 @@ if log.isEnabledFor(logging.DEBUG):
     echo = True
 
 engine = sa.create_engine(engine_url, echo=echo)
-Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True))
+Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True, weak_identity_map=True))
 
 def insert(obj):
     """Insert an object into the database. Actually this just happens with

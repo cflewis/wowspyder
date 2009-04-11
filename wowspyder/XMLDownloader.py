@@ -64,13 +64,6 @@ class XMLDownloader(object):
         
     def __del__(self):
         pass
-        # try:
-        #     os.remove(cache_file)
-        # except OSError, e:
-        #     # cflewis | 2009-04-04 | This happens if XMLDownloader
-        #     # has been threaded, the first thread will delete the cache file.
-        #     # No need to worry.
-        #     pass
         
     def refresh_login(self):
         """Refresh the login, getting a new session cookie from the Armory."""

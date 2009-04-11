@@ -402,26 +402,26 @@ class Character(Base):
         return return_character           
 
 
-class CharacterParserTests(unittest.TestCase):
-    def setUp(self):
-        self.cp = CharacterParser()
-        
-    # def testCharacter(self):
-    #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-    #     
-    # def testRefresh(self):
-    #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
-    #     c.refresh()
-    #     
-    # def testStatistics(self):
-    #     stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
-    #     
-    def testOddGuy1(self):
-        c = self.cp.get_character(u"Roflnewguy", u"Mug'thol", u"us")
-    
-    def testOddGuy2(self):
-        c = self.cp.get_character(u"Varilyn", u"Mug'thol", u"us")
-        
+# class CharacterParserTests(unittest.TestCase):
+#     # def setUp(self):
+#     #     self.cp = CharacterParser()
+#     #     
+#     # # def testCharacter(self):
+#     # #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+#     # #     
+#     # # def testRefresh(self):
+#     # #     c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+#     # #     c.refresh()
+#     # #     
+#     # # def testStatistics(self):
+#     # #     stats = self.cp._get_character_statistics(u"Moulin", u"Ravenholdt", u"us")
+#     # #     
+#     # def testOddGuy1(self):
+#     #     c = self.cp.get_character(u"Roflnewguy", u"Mug'thol", u"us")
+#     # 
+#     # def testOddGuy2(self):
+#     #     c = self.cp.get_character(u"Varilyn", u"Mug'thol", u"us")
+#     #     
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
     also fill out the characters within it.
@@ -558,8 +558,11 @@ class GuildParser(Parser):
             source = self._download_url( \
                 WoWSpyderLib.get_guild_url(guild_name, realm, site, page=page))
 
+            #log.debug(unicode(source, "utf-8").encode("utf-8"))
+            #log.debug("Looking for " + unicode(character_name).encode("utf-8"))
+
             guild_rank_search = re.search("name=\"" + character_name + \
-                "\".*rank=\"(\d*)\"", source)
+                "\".*rank=\"(\d*)\"", unicode(source, "utf-8"))
             if guild_rank_search:
                 return int(guild_rank_search.group(1))
 
@@ -621,30 +624,38 @@ class Guild(Base):
         return self
         
 
-# class GuildParserTests(unittest.TestCase):
-#     def setUp(self):
-#         self.gp = GuildParser()
-# 
-#     # def testGuildRank(self):
-#     #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
-#     # 
-#     # def testGuildRank2(self):
-#     #     self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
-#     # 
-#     # def testInsertGuildNoCharacters(self):
-#     #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
-#     # 
-#     # def testInsertGuildCharacters(self):
-#     #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-#     #         get_characters=True)
-#             
-#     def testRefresh(self):
-#         print "Getting guild without characters"
-#         guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
-#         print "Refreshing guild characters"
-#         guild2 = guild1.refresh()
-#         
-#         self.assertEqual(guild1, guild2)
+class GuildParserTests(unittest.TestCase):
+    def setUp(self):
+        self.gp = GuildParser()
+
+    def testGuildRank(self):
+        self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
+    
+    def testGuildRank2(self):
+        self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
+
+    def testGuildRankUnicode(self):
+        try:
+            result = self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare")
+            print result
+        except Exception, e:
+            print "Exception got " + str(e)
+        #self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
+    
+    # def testInsertGuildNoCharacters(self):
+    #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
+    # 
+    def testInsertGuildCharacters(self):
+        self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+            get_characters=True)
+            
+    # def testRefresh(self):
+    #     print "Getting guild without characters"
+    #     guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
+    #     print "Refreshing guild characters"
+    #     guild2 = guild1.refresh()
+    #     
+    #     self.assertEqual(guild1, guild2)
         
 if __name__ == '__main__':
     unittest.main()
