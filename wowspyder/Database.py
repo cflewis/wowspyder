@@ -39,8 +39,12 @@ def insert(obj):
     """
     return_obj = None
         
-    # try:
-    return_obj = session().merge(obj)
+    try:
+        return_obj = session().merge(obj)
+    except (sa.exceptions.IntegrityError, sa.exceptions.FlushError):
+        # cflewis | 2009-04-11 | Merge shouldn't do this, so ignore
+        pass
+    
     # except Exception, e:
     #     log.warning("Database problem: " + str(e))
     #     session().rollback()

@@ -206,7 +206,7 @@ class CharacterParser(Parser):
         log.debug("Parsing character talents...")
         
         xml = minidom.parse(xml_file_object)
-        talent_tree_nodes = xml.getElementsByTagName("talentTree")
+        talent_tree_nodes = xml.getElementsByTagName("talentSpec")
         talent_tree_node = talent_tree_nodes[0]
         
         return talent_tree_node.attributes["value"].value
@@ -409,21 +409,21 @@ class Character(Base):
         # refresh.
         downloader = XMLDownloader.XMLDownloader()
         source = downloader.download_url(self.url)
-        
-        if has_attr(self, "_last_modified_on_armory"):
+
+        try:
             if self._last_modified_on_armory != None:
                 return self._last_modified_on_armory
-        
-        try:
-            armory_date_string = re.search("lastModified=\"(.*?)\"", source).group(1)
-        except Exception, e:
-            log.debug("Couldn't find last modified, returning what I had")
-            return self.last_modified
-        else:
-            self._last_modified_on_armory = \
-                WoWSpyderLib.convert_last_modified_to_datetime(armory_date_string)
-            log.debug("Saved last modified on armory as " + str(self._last_modified_on_armory))
-            return self._last_modified_on_armory
+        except AttributeError:        
+            try:
+                armory_date_string = re.search("lastModified=\"(.*?)\"", source).group(1)
+            except Exception, e:
+                log.debug("Couldn't find last modified, returning what I had")
+                return self.last_modified
+            else:
+                self._last_modified_on_armory = \
+                    WoWSpyderLib.convert_last_modified_to_datetime(armory_date_string)
+                log.debug("Saved last modified on armory as " + str(self._last_modified_on_armory))
+                return self._last_modified_on_armory
         
     def is_updated_on_armory(self):
         if self.last_modified_on_armory > self.last_modified:
@@ -516,7 +516,10 @@ class GuildParser(Parser):
         """Page through a guild, creating characters."""
         source = self._download_url( \
             WoWSpyderLib.get_guild_url(name, realm, site))
-        max_pages = WoWSpyderLib.get_max_pages(source)
+        # cflewis | 2009-04-16 | Blizzard have disabled maxPage for
+        # characters, so this is just 1 page now.
+        #max_pages = WoWSpyderLib.get_max_pages(source)
+        max_pages = 1
         character_list = []
 
         for page in range(1, (max_pages + 1)):
@@ -571,7 +574,8 @@ class GuildParser(Parser):
         """
         source = self._download_url( \
             WoWSpyderLib.get_guild_url(guild_name, realm, site))
-        max_pages = WoWSpyderLib.get_max_pages(source)
+        #max_pages = WoWSpyderLib.get_max_pages(source)
+        max_pages = 1
 
         for page in range(1, (max_pages + 1)):
             source = self._download_url( \

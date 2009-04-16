@@ -108,6 +108,7 @@ http://github.com/Lewisham/wowspyder")
             
             if error.code == 404:
                 # cflewis | 2009-03-15 | Can't do anything about this
+                log.debug("couldn't find page")
                 raise
             else:
                 # cflewis | 2009-03-15 | Blizzard blocked us. Back off.
@@ -163,7 +164,12 @@ class XMLDownloaderThreaded(object):
         """Download a URL from one of the threads."""
         response_queue = Queue.Queue()
         self.request_queue.put((url, response_queue))
-        return response_queue.get()
+        result = response_queue.get()
+        
+        if isinstance(result, Exception):
+            raise result
+        else:
+            return result
     
     def close(self):
         """Close the object, ending the threads."""
@@ -187,7 +193,14 @@ class XMLDownloaderThread(threading.Thread):
             if url is None:
                 break
             else:
-                response_queue.put(self.downloader.download_url(url))
+                try:
+                    result = self.downloader.download_url(url)
+                except Exception as e:
+                    log.debug("Got exception from downloader, putting it on queue")
+                    result = e
+                
+                response_queue.put(result)
+                    
                 time.sleep(self.sleep_time * random.uniform(1, 1.5))    
 
 
@@ -238,8 +251,13 @@ class XMLDownloaderTests(unittest.TestCase):
         
     def testThreaded(self):
         self.dt = XMLDownloaderThreaded()
+        self.assertRaises(Exception, self.dt.download_url, \
+            "http://chris.to/fakeurl")
+        
+    def testThreadedException(self):
+        self.dt = XMLDownloaderThreaded()
         source = self.dt.download_url(self.moulin)
-        self.assertTrue(source)
+         
         
     def testCacheRefresh(self):
         log.debug("TESTING cache refresh, watch...")
