@@ -198,7 +198,7 @@ class XMLDownloaderThread(threading.Thread):
             else:
                 try:
                     result = self.downloader.download_url(url)
-                except Exception as e:
+                except Exception, e:
                     log.debug("Got exception from downloader, putting it on queue")
                     result = e
                 

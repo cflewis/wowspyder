@@ -24,21 +24,20 @@ class Preferences(object):
     def options(self):
         return self.__options__
         
-    @property
-    def refresh_all(self):
+    def get_refresh_all(self):
         return self.__options__["refresh_all"]
         
-    @refresh_all.setter
-    def refresh_all(self, value):
+    def set_refresh_all(self, value):
         self.__options__["refresh_all"] = value
         
-    @property
-    def database_url(self):
+    def get_database_url(self):
         return self.__options__["database_url"]
         
-    @database_url.setter
-    def database_url(self, value):
+    def set_database_url(self, value):
         self.__options__["database_url"] = value
+        
+    refresh_all = property(get_refresh_all, set_refresh_all)
+    database_url = property(get_database_url, set_database_url)
 
 class PreferencesTests(unittest.TestCase):
     def setUp(self):
