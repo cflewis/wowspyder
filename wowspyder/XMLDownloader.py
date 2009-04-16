@@ -167,6 +167,9 @@ class XMLDownloaderThreaded(object):
         result = response_queue.get()
         
         if isinstance(result, Exception):
+            log.debug("Got exception, starting up new thread in it's place")
+            thread = XMLDownloaderThread(self.request_queue, sleep_time=sleep_time)
+            self.threads.append(thread)
             raise result
         else:
             return result
@@ -187,7 +190,7 @@ class XMLDownloaderThread(threading.Thread):
         
         log.debug("Sleep time is set to " + str(sleep_time))
         
-    def run(self):        
+    def run(self):
         while 1:
             url, response_queue = self.request_queue.get()
             if url is None:

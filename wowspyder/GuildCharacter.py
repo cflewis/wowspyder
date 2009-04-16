@@ -122,7 +122,7 @@ class CharacterParser(Parser):
                 guild = self._gp.get_guild(character_node.attributes["guildName"].value, \
                     realm, site, get_characters=False, cached=True)
             except Exception, e:
-                log.warning("Couldn't get guild " + name + ". ERROR: " + str(e))
+                log.warning("Couldn't get guild for " + name + ". ERROR: " + str(e))
             else:
                 try:
                     guild_rank = self._gp.get_guild_rank(guild.name, realm, site, name)
@@ -164,17 +164,23 @@ class CharacterParser(Parser):
             item = self._ip.get_item(item_node.attributes["id"].value)
             items[int(item_node.attributes["slot"].value)] = item.item_id
         
-        talents = None
+        talents1 = None
+        talents2 = None
         
         try:    
             talents = self._get_character_talents(name, realm, site)
         except Exception, e:
             log.warning("Couldn't get talents for " + name + " " + realm + \
                 " " + site + ". ERROR: " + str(e))
+        else:
+            talents1 = talents[0]
+            talents2 = talents[1]
+            log.debug("Talents 1 is " + str(talents1))
+            log.debug("Talents 2 is " + str(talents2))
         
         character = Character(name, realm, site, level, character_class, faction, \
             gender, race, guild_name, guild_rank, last_modified=last_modified, \
-            items=items, talents=talents)
+            items=items, talents1=talents1, talents2=talents2)
         log.info("Creating character " + unicode(character).encode("utf-8"))
         Database.insert(character)
         
@@ -207,9 +213,15 @@ class CharacterParser(Parser):
         
         xml = minidom.parse(xml_file_object)
         talent_tree_nodes = xml.getElementsByTagName("talentSpec")
-        talent_tree_node = talent_tree_nodes[0]
+        talents = []
         
-        return talent_tree_node.attributes["value"].value
+        for node in talent_tree_nodes:
+            talents.append(node.attributes["value"].value)
+            
+        if len(talents) == 1:
+            talents.append(None)
+                
+        return talents
         
     def _get_character_statistics(self, name, realm, site):
         urls = WoWSpyderLib.get_character_statistics_urls(name, realm, site)
@@ -318,7 +330,8 @@ class Character(Base):
         Column("item_slot_16", Integer(), ForeignKey("ITEM.item_id")),
         Column("item_slot_17", Integer(), ForeignKey("ITEM.item_id")),
         Column("item_slot_18", Integer(), ForeignKey("ITEM.item_id")),
-        Column("talents", Unicode(100)),
+        Column("talents_1", Unicode(100)),
+        Column("talents_2", Unicode(100)),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
         Column("last_modified", DateTime()),
         Column("last_refresh", DateTime(), default=datetime.datetime.now(), index=True),
@@ -330,8 +343,8 @@ class Character(Base):
     statistics = relation(CharacterStatistic, backref="character")
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
-            race, guild, guild_rank, items=None, talents=None, \
-            last_modified=None, last_refresh=None):            
+            race, guild, guild_rank, items=None, talents1=None, \
+            talents2=None, last_modified=None, last_refresh=None):            
         self.name = name
         self.realm = realm
         self.site = site
@@ -343,7 +356,8 @@ class Character(Base):
         self.guild = guild
         self.guild_rank = guild_rank
         self.last_modified = last_modified
-        self.talents = talents
+        self.talents_1 = talents1
+        self.talents_2 = talents2
         
         if last_refresh:
             if last_refresh.year < datetime.datetime.now().year:
@@ -488,7 +502,7 @@ class GuildParser(Parser):
     def _parse_guild(self, xml_file_object, site, get_characters=False):
         """Parse a guild page."""
         xml = minidom.parse(xml_file_object)
-        guild_nodes = xml.getElementsByTagName("guildKey")
+        guild_nodes = xml.getElementsByTagName("guildHeader")
         guild_node = guild_nodes[0]
 
         name = guild_node.attributes["name"].value
@@ -514,30 +528,21 @@ class GuildParser(Parser):
 
     def _parse_guild_characters(self, name, realm, site):
         """Page through a guild, creating characters."""
-        source = self._download_url( \
-            WoWSpyderLib.get_guild_url(name, realm, site))
-        # cflewis | 2009-04-16 | Blizzard have disabled maxPage for
-        # characters, so this is just 1 page now.
-        #max_pages = WoWSpyderLib.get_max_pages(source)
-        max_pages = 1
         character_list = []
 
-        for page in range(1, (max_pages + 1)):
-            log.debug(name + " " + realm + \
-                ": Downloading guild page " + str(page) + " of " \
-                + str(max_pages))
+        log.debug(name + " " + realm + ": Downloading guild page")
 
-            source = self._download_url( \
-                WoWSpyderLib.get_guild_url(name, realm, site, page=page))
+        source = self._download_url( \
+            WoWSpyderLib.get_guild_url(name, realm, site, page=1))
 
-            character_list.append(self._parse_guild_file(StringIO.StringIO(source), site))
+        character_list.append(self._parse_guild_file(StringIO.StringIO(source), site))
 
         return WoWSpyderLib.merge(character_list)
 
     def _parse_guild_file(self, xml_file_object, site):
         """Create characters from a single guild page."""
         xml = minidom.parse(xml_file_object)
-        guild_nodes = xml.getElementsByTagName("guildKey")
+        guild_nodes = xml.getElementsByTagName("guildHeader")
         guild_node = guild_nodes[0]
         cp = CharacterParser(downloader=self._downloader)
         
@@ -573,21 +578,12 @@ class GuildParser(Parser):
         
         """
         source = self._download_url( \
-            WoWSpyderLib.get_guild_url(guild_name, realm, site))
-        #max_pages = WoWSpyderLib.get_max_pages(source)
-        max_pages = 1
+            WoWSpyderLib.get_guild_url(guild_name, realm, site, page=1))
 
-        for page in range(1, (max_pages + 1)):
-            source = self._download_url( \
-                WoWSpyderLib.get_guild_url(guild_name, realm, site, page=page))
-
-            #log.debug(unicode(source, "utf-8").encode("utf-8"))
-            #log.debug("Looking for " + unicode(character_name).encode("utf-8"))
-
-            guild_rank_search = re.search("name=\"" + character_name + \
-                "\".*rank=\"(\d*)\"", unicode(source, "utf-8"))
-            if guild_rank_search:
-                return int(guild_rank_search.group(1))
+        guild_rank_search = re.search("name=\"" + character_name + \
+            "\".*rank=\"(\d*)\"", unicode(source, "utf-8"))
+        if guild_rank_search:
+            return int(guild_rank_search.group(1))
 
         raise IOError("No character in that guild")
 
@@ -664,12 +660,12 @@ class GuildParserTests(unittest.TestCase):
             print "Exception got " + str(e)
         self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
     
-    # def testInsertGuildNoCharacters(self):
-    #     self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
-    # 
-    # def testInsertGuildCharacters(self):
-    #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-    #         get_characters=True)
+    def testInsertGuildNoCharacters(self):
+        self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
+    
+    def testInsertGuildCharacters(self):
+        self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+            get_characters=True)
             
     # def testRefresh(self):
     #     print "Getting guild without characters"
