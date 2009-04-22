@@ -73,7 +73,14 @@ class ArenaParser(Parser):
                     str(ladder_number) + ", continuing. ERROR: " + str(e))
                 continue
             
-            if not max_pages: max_pages = WoWSpyderLib.get_max_pages(source)
+            if not max_pages: 
+                try:
+                    max_pages = WoWSpyderLib.get_max_pages(source)
+                except AttributeError, e:
+                    # cflewis | 2009-04-22 | This means that
+                    # this arena will be skipped, but it's better than
+                    # crashing
+                    max_pages = 0
         
             for page in range(1, (max_pages + 1)):
                 log.debug(battlegroup + " " + realm + \

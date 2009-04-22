@@ -163,8 +163,8 @@ class CharacterParser(Parser):
         
         items = []
         
-        for x in range(0, 19):
-            items.append(CharacterItem(name, realm, site, x, None))
+        for i in range(0, 19):
+            items.append(CharacterItem(name, realm, site, i, None))
         
         item_nodes = xml.getElementsByTagName("item")
         
