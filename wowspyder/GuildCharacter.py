@@ -93,7 +93,12 @@ class CharacterParser(Parser):
         
         xml = minidom.parse(xml_file_object)
         character_nodes = xml.getElementsByTagName("character")
-        character_node = character_nodes[0]
+        
+        try:
+            character_node = character_nodes[0]
+        except IndexError, e:
+            log.debug("No character found in the XML")
+            raise 
         
         name = character_node.attributes["name"].value
         realm = character_node.attributes["realm"].value
@@ -385,32 +390,7 @@ class Character(Base):
         
     def __repr__(self):
         return unicode("<Character('%s','%s','%s','%s','%s')>" % (self.name, \
-            self.realm, self.site, self.race, self.character_class))
-            
-    def explode_items(self, items):
-        if len(items) != 19:
-            raise Exception("Item list length is not 19")
-            
-        self.item_slot_0 = items[0]
-        self.item_slot_1 = items[1]
-        self.item_slot_2 = items[2]
-        self.item_slot_3 = items[3]
-        self.item_slot_4 = items[4]
-        self.item_slot_5 = items[5]
-        self.item_slot_6 = items[6]
-        self.item_slot_7 = items[7]
-        self.item_slot_8 = items[8]
-        self.item_slot_9 = items[9]
-        self.item_slot_10 = items[10]
-        self.item_slot_11 = items[11]
-        self.item_slot_12 = items[12]
-        self.item_slot_13 = items[13]
-        self.item_slot_14 = items[14]
-        self.item_slot_15 = items[15]
-        self.item_slot_16 = items[16]
-        self.item_slot_17 = items[17]
-        self.item_slot_18 = items[18]        
-        
+            self.realm, self.site, self.race, self.character_class))      
     
     @property
     def url(self):
