@@ -156,14 +156,18 @@ class CharacterParser(Parser):
         
         log.debug("Character done, getting items...")
         
-        items = [None] * 19
+        items = []
+        
+        for x in range(0, 19):
+            items.append(CharacterItem(name, realm, site, x, None))
         
         item_nodes = xml.getElementsByTagName("item")
         
         for item_node in item_nodes:
             item = self._ip.get_item(item_node.attributes["id"].value)
-            items[int(item_node.attributes["slot"].value)] = item.item_id
-        
+            items[int(item_node.attributes["slot"].value)] = CharacterItem(name, realm, site, \
+                int(item_node.attributes["slot"].value), item.item_id)
+
         talents1 = None
         talents2 = None
         
@@ -292,6 +296,31 @@ class CharacterStatistic(Base):
     def __repr__(self):
         return unicode("<CharacterStatistic('%s','%s','%s','%s','%s')>" % (self.name, \
             self.realm, self.site, self.statistic, self.value))
+            
+
+class CharacterItem(Base):
+    """An item on a character."""
+    __table__ = Table("CHARACTER_ITEM", Base.metadata,
+        Column("name", Unicode(100), primary_key=True),
+        Column("realm", Unicode(100), primary_key=True),
+        Column("site", Unicode(2), primary_key=True),
+        Column("slot", Integer(), primary_key=True, autoincrement=False),
+        Column("item_id", Integer(), ForeignKey("ITEM.item_id")),
+        ForeignKeyConstraint(['name','realm', 'site'], ['CHARACTER.name', 'CHARACTER.realm', 'CHARACTER.site']),
+        mysql_charset="utf8",
+        mysql_engine="InnoDB"
+    )
+
+    def __init__(self, name, realm, site, slot, item_id):
+        self.name = name
+        self.realm = realm
+        self.site = site
+        self.slot = slot
+        self.item_id = item_id
+
+    def __repr__(self):
+        return unicode("<Item('%s','%s','%s','%s','%d')>" % (self.name, \
+            self.realm, self.site, self.slot, self.item_id))
 
 
 class Character(Base):
@@ -311,25 +340,6 @@ class Character(Base):
             u"Blood Elf"])),
         Column("guild", Unicode(100), ForeignKey("GUILD.name")),
         Column("guild_rank", Integer()),
-        Column("item_slot_0", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_1", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_2", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_3", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_4", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_5", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_6", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_7", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_8", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_9", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_10", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_11", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_12", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_13", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_14", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_15", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_16", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_17", Integer(), ForeignKey("ITEM.item_id")),
-        Column("item_slot_18", Integer(), ForeignKey("ITEM.item_id")),
         Column("talents_1", Unicode(100)),
         Column("talents_2", Unicode(100)),
         Column("first_seen", DateTime(), default=datetime.datetime.now()),
@@ -341,6 +351,7 @@ class Character(Base):
     )
     
     statistics = relation(CharacterStatistic, backref="character")
+    items = relation(CharacterItem, backref="character")
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
             race, guild, guild_rank, items=None, talents1=None, \
@@ -370,7 +381,7 @@ class Character(Base):
         self.last_refresh = last_refresh
         
         if items:
-            self.explode_items(items)
+            self.items = items
         
     def __repr__(self):
         return unicode("<Character('%s','%s','%s','%s','%s')>" % (self.name, \
