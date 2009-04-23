@@ -35,6 +35,7 @@ import Preferences
 import re
 from Parser import Parser
 from Item import ItemParser
+from Achievement import AchievementParser
 
 log = Logger.log()
 
@@ -56,6 +57,7 @@ class CharacterParser(Parser):
         Parser.__init__(self, downloader=downloader)
         self._gp = GuildParser(downloader=self._downloader)
         self._ip = ItemParser(downloader=self._downloader)
+        self._ap = AchievementParser(downloader=self._downloader)
         Base.metadata.create_all(Database.engine)
         
     def _check_download(self, source, exception):
@@ -69,7 +71,7 @@ class CharacterParser(Parser):
             
         return source
                         
-    def get_character(self, name, realm, site, cached=False):
+    def get_character(self, name, realm, site, cached=False, force_refresh=False):
         """Return a character object. This only stubs the guild, which means
         the guild won't be populated with characters."""
         log.debug("Getting character " + name + "...")
@@ -78,7 +80,7 @@ class CharacterParser(Parser):
         
         # cflewis | 2009-04-11 | Check if a character is actually updated
         # on the armory. If not, return the database version anyway.
-        if character and (cached == True or character.is_updated_on_armory() == False):
+        if character and (cached == True or character.is_updated_on_armory() == False) and not force_refresh:
             return character            
         
         source = self._download_url(\
@@ -169,9 +171,13 @@ class CharacterParser(Parser):
         item_nodes = xml.getElementsByTagName("item")
         
         for item_node in item_nodes:
-            item = self._ip.get_item(item_node.attributes["id"].value)
-            items[int(item_node.attributes["slot"].value)] = CharacterItem(name, realm, site, \
-                int(item_node.attributes["slot"].value), item.item_id)
+            try:
+                item = self._ip.get_item(item_node.attributes["id"].value)
+            except Exception, e:
+                continue
+            else:
+                items[int(item_node.attributes["slot"].value)] = CharacterItem(name, realm, site, \
+                    int(item_node.attributes["slot"].value), item.item_id)
 
         talents1 = None
         talents2 = None
@@ -203,6 +209,17 @@ class CharacterParser(Parser):
         
         for statistic in statistics:
             character.statistics.append(statistic)
+            
+        achievements = []
+
+        try:
+            achievements = self._get_character_achievements(name, realm, site)
+        except Exception, e:
+            log.warning("Couldn't get achievements for " + name + " " + realm + \
+                " " + site + ". ERROR: " + str(e))
+
+        for achievement in achievements:
+            character.achievements.append(achievements)
                 
         Database.insert(character)
                 
@@ -238,7 +255,8 @@ class CharacterParser(Parser):
         
         for url in urls:
             source = self._download_url(url)
-            statistics.append(self._parse_character_statistics(StringIO.StringIO(source), name, realm, site))
+            statistics.append(self._parse_character_statistics( \
+                StringIO.StringIO(source), name, realm, site))
             
         return WoWSpyderLib.merge(statistics)
             
@@ -275,6 +293,81 @@ class CharacterParser(Parser):
             statistics.append(statistic)
                 
         return statistics
+        
+    def _get_character_achievements(self, name, realm, site):
+        urls = WoWSpyderLib.get_character_achievement_urls(name, realm, site)
+        achievements = []
+
+        for url in urls:
+            source = self._download_url(url)
+            achievements.append(self._parse_character_achievements( \
+                StringIO.StringIO(source), name, realm, site))
+
+        return WoWSpyderLib.merge(achievements)
+
+
+    def _parse_character_achievements(self, xml_file_object, name, realm, site):
+        """Parse the XML of a achievements character sheet from the Armory."""
+        log.debug("Parsing character achievements...")
+        xml = minidom.parse(xml_file_object)
+        achievements = []
+        achievement_nodes = xml.getElementsByTagName("achievement")
+
+        for achievement_node in achievement_nodes:
+            try:
+                achievement = achievement_node.attributes["dateCompleted"].value
+            except KeyError, e:
+                # cflewis | 2009-04-23 | This wasn't a completed achievement
+                continue
+
+            
+            achievement_id = achievement_node.attributes["id"].value
+            category_id = achievement_node.attributes["categoryId"].value
+            achievement_name = achievement_node.attributes["title"].value
+            description = achievement_node.attributes["desc"].value
+            
+            try:
+                points = achievement_node.attributes["points"].value
+            except KeyError, e:
+                points = None
+                
+            date_completed = WoWSpyderLib.convert_date_completed_to_datetime( \
+                achievement_node.attributes["dateCompleted"].value)
+
+            achievement = self._ap.get_achievement(achievement_id, \
+                category_id, achievement_name, points, description)
+            character_achievement = CharacterAchievement(name, realm, site, \
+                achievement.achievement_id, date_completed)
+            Database.insert(character_achievement)
+            achievements.append(character_achievement)
+
+        return achievements
+        
+class CharacterAchievement(Base):
+    """An achievement for a character."""
+    __table__ = Table("CHARACTER_ACHIEVEMENT", Base.metadata,
+        Column("name", Unicode(100), primary_key=True),
+        Column("realm", Unicode(100), primary_key=True),
+        Column("site", Unicode(2), primary_key=True),
+        Column("achievement_id", Integer(), \
+            ForeignKey("ACHIEVEMENT.achievement_id"), primary_key=True),
+        Column("date_completed", DateTime()),
+        ForeignKeyConstraint(['name','realm', 'site'], ['CHARACTER.name', 'CHARACTER.realm', 'CHARACTER.site']),
+        mysql_charset="utf8",
+        mysql_engine="InnoDB"
+    )
+
+    def __init__(self, name, realm, site, achievement_id, date_completed):
+        self.name = name
+        self.realm = realm
+        self.site = site
+        self.achievement_id = achievement_id
+        self.date_completed = date_completed
+
+    def __repr__(self):
+        return unicode("<CharacterAchievement('%s','%s','%s','%s')>" % \
+            (self.name, self.realm, self.site, self.achievement_id))
+     
 
 class CharacterStatistic(Base):
     """A statistic on a character."""
@@ -357,6 +450,7 @@ class Character(Base):
     
     statistics = relation(CharacterStatistic, backref="character")
     items = relation(CharacterItem, backref="character")
+    achievements = relation(CharacterAchievement, backref="character")
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
             race, guild, guild_rank, items=None, talents1=None, \
@@ -441,10 +535,10 @@ class Character(Base):
 class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
-        self.c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us")
+        self.c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us", force_refresh=True)
     def testCharacterModifiedDate(self):
         self.assertFalse(self.c.is_updated_on_armory())
-    
+
         
 class GuildParser(Parser):
     """A parser to return guilds. By default, returning a guild will
@@ -654,10 +748,10 @@ class GuildParserTests(unittest.TestCase):
     def testInsertGuildNoCharacters(self):
         self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
     
-    def testInsertGuildCharacters(self):
-        self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-            get_characters=True)
-            
+    # def testInsertGuildCharacters(self):
+    #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+    #         get_characters=True)
+    #         
     # def testRefresh(self):
     #     print "Getting guild without characters"
     #     guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)

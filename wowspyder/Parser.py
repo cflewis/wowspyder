@@ -19,7 +19,8 @@ Base = Database.get_base()
 log = Logger.log()
 
 class Parser(object):
-    def __init__(self, number_of_threads=20, sleep_time=2, downloader=None):
+    def __init__(self, number_of_threads=20, sleep_time=2, downloader=None, \
+            no_downloader=False):
         self._downloader = downloader
 
         if self._downloader is None:
@@ -32,7 +33,10 @@ class Parser(object):
         self._prefs = Preferences.Preferences()
         
     def __del__(self):
-        self._downloader.close()
+        try:
+            self._downloader.close()
+        except AttributeError, e:
+            pass
         
     def _refresh_downloader(self):
         log.debug("Refreshing downloader")

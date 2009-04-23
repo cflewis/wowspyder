@@ -90,15 +90,34 @@ def get_character_statistics_urls(name, realm, site):
             
     return urls
     
+def get_character_achievement_urls(name, realm, site):
+    urls = []
+
+    for category in [92,96,97,95,168,169,201,155,81]:
+        urls.append(_get_character_achievement_base_url(name, realm, site) + \
+            "&c=" + str(category))
+
+    return urls
+
 def _get_character_statistic_base_url(name, realm, site):
     """Return the base URL for character statistics"""
     return get_site_url(site) + "character-statistics.xml?" + \
         "r=" + quote(realm.encode("utf-8")) + \
         "&n=" + quote(name.encode("utf-8"))
         
+def _get_character_achievement_base_url(name, realm, site):
+    """Return the base URL for character achievements"""
+    return get_site_url(site) + "character-achievements.xml?" + \
+        "r=" + quote(realm.encode("utf-8")) + \
+        "&n=" + quote(name.encode("utf-8"))
+        
 def convert_last_modified_to_datetime(date_string):
     log.debug("Date string is " + str(date_string))
     return datetime.datetime(*time.strptime(date_string, "%B %d, %Y")[0:5])
+    
+def convert_date_completed_to_datetime(date_string):
+    log.debug("Date string is " + str(date_string))
+    return datetime.datetime(*time.strptime(date_string, "%Y-%m-%d-%H:%M")[0:5])
     
 def merge(seq):
     """Merge a list of lists into one big list."""

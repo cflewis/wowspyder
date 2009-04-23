@@ -20,10 +20,6 @@ def main():
     suite.addTest(unittest.TestLoader().loadTestsFromModule(wowspyder.Arena))
     unittest.TextTestRunner(verbosity=2).run(suite)
 
-    from guppy import hpy
-    h = hpy()
-    print h.heap()
-
 if __name__ == '__main__':
     main()
 
