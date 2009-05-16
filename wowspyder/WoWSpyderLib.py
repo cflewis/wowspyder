@@ -120,9 +120,8 @@ def convert_last_modified_to_datetime(date_string):
     return datetime.datetime(*time.strptime(date_string, "%B %d, %Y")[0:5])
     
 def convert_date_completed_to_datetime(date_string):
-    log.debug("Date string is " + str(date_string))
     date_string = date_string[:-6]
-    return datetime.datetime(*time.strptime(date_string, "%Y-%m-%d-%H:%M")[0:5])
+    return datetime.datetime(*time.strptime(date_string, "%Y-%m-%d")[0:5])
     
 def merge(seq):
     """Merge a list of lists into one big list."""

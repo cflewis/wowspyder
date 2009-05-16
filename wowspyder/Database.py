@@ -29,7 +29,7 @@ if log.isEnabledFor(logging.DEBUG):
     echo = True
 
 engine = sa.create_engine(engine_url, echo=echo)
-Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autocommit=True, weak_identity_map=True))
+Session = sa.orm.scoped_session(sa.orm.sessionmaker(bind=engine, autoflush=False, autocommit=False, weak_identity_map=True))
 
 def insert(obj):
     """Insert an object into the database. Actually this just happens with
@@ -41,9 +41,10 @@ def insert(obj):
         
     try:
         return_obj = session().merge(obj)
-    except (sa.exceptions.IntegrityError, sa.exceptions.FlushError):
+        session().commit()
+    except (sa.exceptions.IntegrityError, sa.exceptions.FlushError), e:
         # cflewis | 2009-04-11 | Merge shouldn't do this, so ignore
-        pass
+        log.warning("Error commiting: " + str(e))
     
     # except Exception, e:
     #     log.warning("Database problem: " + str(e))

@@ -207,8 +207,9 @@ class CharacterParser(Parser):
             log.warning("Couldn't get statistics for " + name + " " + realm + \
                 " " + site + ". ERROR: " + str(e))
         
-        for statistic in statistics:
-            character.statistics.append(statistic)
+        character.statistics = statistics
+        #for statistic in statistics:
+        #    character.statistics.append(statistic)
             
         achievements = []
 
@@ -218,8 +219,7 @@ class CharacterParser(Parser):
             log.warning("Couldn't get achievements for " + name + " " + realm + \
                 " " + site + ". ERROR: " + str(e))
 
-        for achievement in achievements:
-            character.achievements.append(achievement)
+        character.achievements = achievements
                 
         Database.insert(character)
                 
@@ -290,7 +290,7 @@ class CharacterParser(Parser):
             statistic = CharacterStatistic(name, realm, site, \
                 statistic, quantity, highest)
             log.debug(statistic)
-            Database.insert(statistic)
+            #Database.insert(statistic)
             statistics.append(statistic)
                 
         return statistics
@@ -339,7 +339,7 @@ class CharacterParser(Parser):
                 category_id, achievement_name, points, description)
             character_achievement = CharacterAchievement(name, realm, site, \
                 achievement.achievement_id, date_completed)
-            Database.insert(character_achievement)
+            #Database.insert(character_achievement)
             achievements.append(character_achievement)
 
         return achievements
@@ -393,7 +393,7 @@ class CharacterStatistic(Base):
         self.highest = highest
 
     def __repr__(self):
-        return unicode("<CharacterStatistic('%s','%s','%s','%s','%s')>" % (self.name, \
+        return unicode("<CharacterStatistic('%s', %s','%s','%s','%s','%s')>" % (id(self), self.name, \
             self.realm, self.site, self.statistic, self.quantity))
             
 
@@ -539,7 +539,7 @@ class Character(Base):
 class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
-        self.c = self.cp.get_character(u"Aabiranash", u"Daggerspine", u"eu", force_refresh=True)
+        self.c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us", force_refresh=True)
         
     def testCharacterModifiedDate(self):
         self.assertFalse(self.c.is_updated_on_armory())
@@ -691,7 +691,7 @@ class Guild(Base):
         mysql_engine="InnoDB"
     )
 
-    characters = relation(Character, backref=backref("guild_object"), cascade="all, delete, delete-orphan")
+    characters = relation(Character, backref=backref("guild_object"))
 
     def __init__(self, name, realm, site, last_refresh=None):
         self.name = name

@@ -115,6 +115,8 @@ class TeamParser(Parser):
         Database.insert(team)
         # cflewis | 2009-04-08 | Doing this prevents leaks BUT ONLY
         # IF TEAM IS NOT REINSERTED INTO THE DATABASE!
+        # cflewis | 2009-05-16 | This might also cause an exception if reenabled
+        # as it intentionally orphans the old objects.
         team.characters = []
         #Database.insert(team)
 
@@ -176,8 +178,8 @@ class Team(Base):
         mysql_engine="InnoDB"
     )
     
-    realm_object = relation(Realm, backref=backref("teams"), cascade="all, delete, delete-orphan")
-    characters = relation(Character, secondary=team_characters, backref=backref("teams"), cascade="all, delete, delete-orphan")
+    realm_object = relation(Realm, backref=backref("teams"))
+    characters = relation(Character, secondary=team_characters, backref=backref("teams"))
     
     def __init__(self, name, realm, site, size, faction, last_refresh=None):
         log.debug("%s, %s, %s, %s" % (name, realm, site, str(size)))
