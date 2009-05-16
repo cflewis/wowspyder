@@ -151,6 +151,7 @@ class XMLDownloaderThreaded(object):
     def __init__(self, number_of_threads=20, sleep_time=10):
         self.threads = []
         self.request_queue = Queue.Queue()
+        self.sleep_time = sleep_time
     
         for x in xrange(number_of_threads):
             thread = XMLDownloaderThread(self.request_queue, sleep_time=sleep_time)
@@ -168,7 +169,7 @@ class XMLDownloaderThreaded(object):
         
         if isinstance(result, Exception):
             log.debug("Got exception, starting up new thread in it's place")
-            thread = XMLDownloaderThread(self.request_queue, sleep_time=sleep_time)
+            thread = XMLDownloaderThread(self.request_queue, sleep_time=self.sleep_time)
             self.threads.append(thread)
             raise result
         else:
@@ -188,7 +189,7 @@ class XMLDownloaderThread(threading.Thread):
         self.request_queue = request_queue
         self.sleep_time = sleep_time
         
-        log.debug("Sleep time is set to " + str(sleep_time))
+        log.debug("Sleep time is set to " + str(self.sleep_time))
         
     def run(self):
         while 1:

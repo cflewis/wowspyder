@@ -51,8 +51,9 @@ class Parser(object):
         try:
             source = self._downloader.download_url(url)
         except Exception, e:
-            log.warning("Parser downloading returned an exception " + e)
+            log.warning("Parser downloading returned an exception " + str(e))
             error = e
+            source = None
             
         log.debug("Parser returning download source...")
         return self._check_download(self._downloader.download_url(url), error)

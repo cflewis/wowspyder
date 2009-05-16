@@ -61,7 +61,7 @@ class CharacterParser(Parser):
         Base.metadata.create_all(Database.engine)
         
     def _check_download(self, source, exception):
-        if exception:
+        if exception or source == None:
             log.error("Unable to download file for character")
             raise exception
             
@@ -219,7 +219,7 @@ class CharacterParser(Parser):
                 " " + site + ". ERROR: " + str(e))
 
         for achievement in achievements:
-            character.achievements.append(achievements)
+            character.achievements.append(achievement)
                 
         Database.insert(character)
                 
@@ -289,6 +289,7 @@ class CharacterParser(Parser):
             
             statistic = CharacterStatistic(name, realm, site, \
                 statistic, quantity, highest)
+            log.debug(statistic)
             Database.insert(statistic)
             statistics.append(statistic)
                 
@@ -393,7 +394,7 @@ class CharacterStatistic(Base):
 
     def __repr__(self):
         return unicode("<CharacterStatistic('%s','%s','%s','%s','%s')>" % (self.name, \
-            self.realm, self.site, self.statistic, self.value))
+            self.realm, self.site, self.statistic, self.quantity))
             
 
 class CharacterItem(Base):
@@ -448,9 +449,9 @@ class Character(Base):
         mysql_engine="InnoDB"
     )
     
-    statistics = relation(CharacterStatistic, backref="character")
-    items = relation(CharacterItem, backref="character")
-    achievements = relation(CharacterAchievement, backref="character")
+    statistics = relation(CharacterStatistic, backref="character", cascade="all, delete, delete-orphan")
+    items = relation(CharacterItem, backref="character", cascade="all, delete, delete-orphan")
+    achievements = relation(CharacterAchievement, backref="character", cascade="all, delete, delete-orphan")
         
     def __init__(self, name, realm, site, level, character_class, faction, gender, \
             race, guild, guild_rank, items=None, talents1=None, \
@@ -490,12 +491,15 @@ class Character(Base):
     def url(self):
         return WoWSpyderLib.get_character_sheet_url(self.name, self.realm, self.site)
                 
-    def refresh(self):
-        cp = CharacterParser()
+    def refresh(self, character_parser=None):
+        if character_parser is None:
+            cp = CharacterParser()
+        else:
+            cp = character_parser
         
         try:
             return_character = cp.get_character(self.name, self.realm, self.site, \
-                cached=False)
+                cached=False, force_refresh=True)
         except Exception, e:
             log.warning("Couldn't find character again")
             
@@ -535,7 +539,8 @@ class Character(Base):
 class CharacterParserTests(unittest.TestCase):
     def setUp(self):
         self.cp = CharacterParser()
-        self.c = self.cp.get_character(u"Moulin", u"Ravenholdt", u"us", force_refresh=True)
+        self.c = self.cp.get_character(u"Aabiranash", u"Daggerspine", u"eu", force_refresh=True)
+        
     def testCharacterModifiedDate(self):
         self.assertFalse(self.c.is_updated_on_armory())
 
@@ -686,7 +691,7 @@ class Guild(Base):
         mysql_engine="InnoDB"
     )
 
-    characters = relation(Character, backref=backref("guild_object"))
+    characters = relation(Character, backref=backref("guild_object"), cascade="all, delete, delete-orphan")
 
     def __init__(self, name, realm, site, last_refresh=None):
         self.name = name
@@ -719,46 +724,49 @@ class Guild(Base):
         gp = GuildParser()
         # cflewis | 2009-03-31 | Get guild could actually return None if this
         # guild was disbanded. I don't feel like dealing with this right now.
-        return_guild = gp.get_guild(self.name, self.realm, self.site, \
-            get_characters=get_characters, cached=False)
-        
+        try:
+            return_guild = gp.get_guild(self.name, self.realm, self.site, \
+                get_characters=get_characters, cached=False)
+        except Exception, e:
+            return_guild = None
+            
         if return_guild is not None:
             return return_guild
             
         return self
         
 
-class GuildParserTests(unittest.TestCase):
-    def setUp(self):
-        self.gp = GuildParser()
-
-    def testGuildRank(self):
-        self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
-    
-    def testGuildRank2(self):
-        self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
-
-    def testGuildRankUnicode(self):
-        try:
-            result = self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare")
-        except Exception, e:
-            print "Exception got " + str(e)
-        self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
-    
-    def testInsertGuildNoCharacters(self):
-        self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
-    
-    # def testInsertGuildCharacters(self):
-    #     self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
-    #         get_characters=True)
-    #         
-    # def testRefresh(self):
-    #     print "Getting guild without characters"
-    #     guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
-    #     print "Refreshing guild characters"
-    #     guild2 = guild1.refresh()
-    #     
-    #     self.assertEqual(guild1, guild2)
+# class GuildParserTests(unittest.TestCase):
+#     def setUp(self):
+#         self.gp = GuildParser()
+# 
+#     def testGuildRank(self):
+#         self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snicker"), 1)
+#     
+#     def testGuildRank2(self):
+#         self.assertEquals(self.gp.get_guild_rank(u"Meow", u"Cenarius", u"us", "Snoozer"), 4)
+# 
+#     def testGuildRankUnicode(self):
+#         try:
+#             result = self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare")
+#         except Exception, e:
+#             print "Exception got " + str(e)
+#         self.assertEquals(self.gp.get_guild_rank(u"Beasts of Unusual Size", u"Ravenholdt", u"us", u"Nìghtmare"), 4)
+#     
+#     def testInsertGuildNoCharacters(self):
+#         self.gp.get_guild(u"Meow", u"Cenarius", u"us", get_characters=False)
+#     
+#     def testInsertGuildCharacters(self):
+#         self.gp.get_guild(u"Beasts of Unusual Size", u"Ravenholdt", u"us", \
+#             get_characters=True)
+#             
+#     def testRefresh(self):
+#         print "Getting guild without characters"
+#         guild1 = self.gp.get_guild(u"The Muffin Club", u"Ravenholdt", u"us", get_characters=False)
+#         print "Refreshing guild characters"
+#         guild2 = guild1.refresh()
+#         
+#         self.assertEqual(guild1, guild2)
         
 if __name__ == '__main__':
     unittest.main()

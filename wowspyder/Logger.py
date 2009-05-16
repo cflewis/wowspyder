@@ -14,7 +14,7 @@ import logging
 import logging.handlers
 
 _log = logging.getLogger("wowspyder")
-_log.setLevel(logging.INFO)
+_log.setLevel(logging.DEBUG)
 
 _handler = logging.FileHandler(".output.log", "w")
 _formatter = logging.Formatter("%(asctime)s : %(levelname)s : " + \

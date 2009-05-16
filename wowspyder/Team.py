@@ -176,8 +176,8 @@ class Team(Base):
         mysql_engine="InnoDB"
     )
     
-    realm_object = relation(Realm, backref=backref("teams"))
-    characters = relation(Character, secondary=team_characters, backref=backref("teams"))
+    realm_object = relation(Realm, backref=backref("teams"), cascade="all, delete, delete-orphan")
+    characters = relation(Character, secondary=team_characters, backref=backref("teams"), cascade="all, delete, delete-orphan")
     
     def __init__(self, name, realm, site, size, faction, last_refresh=None):
         log.debug("%s, %s, %s, %s" % (name, realm, site, str(size)))
