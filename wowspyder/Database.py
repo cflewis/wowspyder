@@ -49,6 +49,8 @@ def insert(obj):
     except Exception, e:
         log.warning("Database problem: " + str(e))
         session().rollback()
+
+    session.clear()
             
 def session():
     return Session()
