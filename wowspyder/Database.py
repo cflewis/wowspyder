@@ -50,7 +50,7 @@ def insert(obj):
         log.warning("Database problem: " + str(e))
         session().rollback()
 
-    session.expunge(obj)
+    #session().expunge(obj)
             
 def session():
     return Session()
