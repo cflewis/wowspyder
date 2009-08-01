@@ -1,13 +1,11 @@
 WoWSpyder
 ==================
-![WoWSpyder image](http://www.planetwarcraft.com/wow/worldinfo/monster/spider.jpg)
-
 WoWSpyder is an API for the [World of Warcraft Armory](http://www.wowarmory.com) written in Python.
 
 Status
 ======
 
-WoWSpyder is a pre-alpha, work-in-progress product.
+WoWSpyder is a work-in-progress product, but it should work OK. It's been flaky on me recently, so your milage may vary. I'm not all that proud of the code's actual operation (but the code is nice).
 
 License
 =======
@@ -23,7 +21,7 @@ Setup
 
 Prerequisites
 -------------
-You'll need an install of [SQLAlchemy](http://www.sqlalchemy.org/) and [PyYaml](http://pyyaml.org/wiki/PyYAML), as well as Python 2.6. 2.5 won't cut it!
+You'll need an install of [SQLAlchemy](http://www.sqlalchemy.org/) and [PyYaml](http://pyyaml.org/wiki/PyYAML), as well as Python 2.5 or higher.
 
 Other things
 ------------
@@ -38,12 +36,5 @@ Database
 
 WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory database, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
 
-
-To Do
-=====
-* Actually finishing to an alpha stage.
-* Better documentation, both for users and docstrings for developers.
-* Handle all the character sheet things.
-
 --
-[Chris Lewis](http://chris.to)
+[Chris Lewis](http://cflewis.com)

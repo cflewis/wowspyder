@@ -45,6 +45,7 @@ class AchievementParser(Parser):
         achievement = self._session.query(Achievement).get(achievement_id)
         
         if achievement:
+            log.debug("Found achievement already, with achievement ID" + str(achievement.achievement_id))
             return achievement
             
         log.debug("Saving achievement...")

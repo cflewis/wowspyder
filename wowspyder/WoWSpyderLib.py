@@ -120,7 +120,7 @@ def convert_last_modified_to_datetime(date_string):
     return datetime.datetime(*time.strptime(date_string, "%B %d, %Y")[0:5])
     
 def convert_date_completed_to_datetime(date_string):
-    date_string = date_string[:-6]
+    date_string = date_string[:-15]
     return datetime.datetime(*time.strptime(date_string, "%Y-%m-%d")[0:5])
     
 def merge(seq):
