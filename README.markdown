@@ -1,6 +1,6 @@
 WoWSpyder
 ==================
-WoWSpyder is an API for the [World of Warcraft Armory](http://www.wowarmory.com) written in Python.
+WoWSpyder is an API for the [World of Warcraft Armory](http://www.wowarmory.com) written in Python. It's not perfect, and if you're not prepared to head into the code once in a while, I don't recommend it's use. I no longer intend to release patches for this.
 
 Status
 ======
@@ -34,7 +34,7 @@ Architecture
 Database
 --------
 
-WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. By default, it creates an SQLite in-memory database, but doing this means you lose persistence. Persistence will speed up your response time drastically. 
+WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. The easiest thing is an SQLite in-memory database (specify 'database_url: sqlite:///:memory:' in .wowspyder.yaml, without the quotes), but doing this means you lose persistence. Persistence will speed up your response time drastically. 
 
 --
 [Chris Lewis](http://cflewis.com)
