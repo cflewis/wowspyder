@@ -36,7 +36,7 @@ Architecture
 Database
 --------
 
-WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. The easiest thing is an SQLite in-memory database (specify 'database_url: sqlite:///:memory:' in .wowspyder.yaml, without the quotes), but doing this means you lose persistence. Persistence will speed up your response time drastically. 
+WoWSpyder uses SQLAlchemy to save to a database. That database can be anything SQLAlchemy supports, including MySQL, Oracle and PostgreSQL. The easiest thing is an SQLite in-memory database (specify `database_url: sqlite:///:memory:` in .wowspyder.yaml), but doing this means you lose persistence. Persistence will speed up your response time drastically. 
 
 --
 [Chris Lewis](http://cflewis.com)
