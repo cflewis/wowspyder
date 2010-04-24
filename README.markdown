@@ -25,8 +25,8 @@ You'll need an install of [SQLAlchemy](http://www.sqlalchemy.org/) and [PyYaml](
 
 Other things
 ------------
-Make a yaml file called ".wowspyder.yaml" in the wowspyder/ directory with
-a "database_url" key, with your database URL, specified in an SQLAlchemy format. For example, mine looks like:
+Make a yaml file called `.wowspyder.yaml` in the `wowspyder/` directory with
+a `database_url` key, with your database URL, specified in an SQLAlchemy format. For example, mine looks like:
 	
 	database_url: mysql://USERNAME:PASSWORD@SERVER:PORT/DB_NAME?charset=utf8&use_unicode=0
 
