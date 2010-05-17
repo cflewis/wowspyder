@@ -24,7 +24,7 @@ import time
 import random
 import threading
 import Queue
-from shove import Shove
+#from shove import Shove
 import signal
 import gc
 
@@ -32,7 +32,7 @@ log = Logger.log()
 
 # cflewis | 2009-04-08 | I think storing this in memory is causing
 # memory exhaustion, which is what could be contributing to scaling issues.
-cache = Shove()
+cache = {}
 
 def refresh_cache(signum, frame):
     cache.clear()
