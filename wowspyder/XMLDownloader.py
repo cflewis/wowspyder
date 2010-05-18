@@ -25,7 +25,7 @@ import random
 import threading
 import Queue
 #from shove import Shove
-import signal
+#import signal
 import gc
 
 log = Logger.log()
@@ -38,12 +38,14 @@ def refresh_cache(signum, frame):
     cache.clear()
     gc.collect()
     log.debug("Refreshed cache")
-    signal.signal(signal.SIGALRM, refresh_cache)
-    signal.alarm(300)
+    # signal.signal(signal.SIGALRM, refresh_cache)
+    # signal.alarm(300)
+    t = threading.Timer(300, refresh_cache)
+    t.start()
 
 log.debug("Setting alarm")
-signal.signal(signal.SIGALRM, refresh_cache)
-signal.alarm(300)
+t = threading.Timer(300, refresh_cache)
+t.start()
 
 class XMLDownloader(object):
     ''' A class that creates a session with the WoW Armory, saving a cookie
